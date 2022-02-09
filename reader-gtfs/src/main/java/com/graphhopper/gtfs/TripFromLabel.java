@@ -30,7 +30,6 @@ import com.google.common.collect.Maps;
 import com.google.transit.realtime.GtfsRealtime;
 import com.graphhopper.ResponsePath;
 import com.graphhopper.Trip;
-import com.graphhopper.config.Profile;
 import com.graphhopper.gtfs.fare.Fares;
 import com.graphhopper.routing.InstructionsFromEdges;
 import com.graphhopper.routing.Path;
