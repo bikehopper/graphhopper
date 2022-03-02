@@ -46,7 +46,6 @@ public enum Cycleway {
       }
     }
 
-    System.out.println("Cycleway asked to find name: " + name);
     return OTHER;
   }
 }
