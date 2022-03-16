@@ -216,16 +216,6 @@ public final class PtRouterImpl implements PtRouter {
                     stationLabels.add(label);
                 }
             }
-            // response.addDebugInfo("stationLabels", stationLabels.stream().map(label -> {
-            //     HashMap<String, Object> labelProps = new HashMap<>();
-            //     labelProps.put("nodeId", label.node.toString());
-            //     labelProps.put("streetTime", label.streetTime);
-            //     labelProps.put("extraWeight", label.extraWeight);
-            //     if (label.edge != null) {
-            //         labelProps.put("edgeType", label.edge.getType());
-            //     }
-            //     return labelProps;
-            // }).toArray());
 
             Map<Label.NodeId, Label> reverseSettledSet = new HashMap<>();
             for (Label stationLabel : stationLabels) {
