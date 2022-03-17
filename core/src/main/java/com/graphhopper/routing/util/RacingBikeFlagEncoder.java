@@ -18,6 +18,7 @@
 package com.graphhopper.routing.util;
 
 import com.graphhopper.reader.ReaderWay;
+import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.PMap;
 
 import java.util.TreeMap;
@@ -116,10 +117,14 @@ public class RacingBikeFlagEncoder extends BikeCommonFlagEncoder {
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.GOOD, 1.0d);
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.INTERMEDIATE, 0.9d);
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.BAD, 0.7d);
-        setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.VERY_BAD, smoothnessFactorPushingSectionThreshold);
-        setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.HORRIBLE, smoothnessFactorPushingSectionThreshold);
-        setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.VERY_HORRIBLE, smoothnessFactorPushingSectionThreshold);
-        setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.IMPASSABLE, smoothnessFactorPushingSectionThreshold);
+        setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.VERY_BAD,
+                smoothnessFactorPushingSectionThreshold);
+        setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.HORRIBLE,
+                smoothnessFactorPushingSectionThreshold);
+        setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.VERY_HORRIBLE,
+                smoothnessFactorPushingSectionThreshold);
+        setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.IMPASSABLE,
+                smoothnessFactorPushingSectionThreshold);
 
         routeMap.put(INTERNATIONAL, BEST.getValue());
         routeMap.put(NATIONAL, BEST.getValue());
@@ -135,8 +140,8 @@ public class RacingBikeFlagEncoder extends BikeCommonFlagEncoder {
     }
 
     @Override
-    void collect(ReaderWay way, double wayTypeSpeed, TreeMap<Double, Integer> weightToPrioMap) {
-        super.collect(way, wayTypeSpeed, weightToPrioMap);
+    void collect(IntsRef edgeFlags, ReaderWay way, double wayTypeSpeed, TwoDirectionsPriorityMap weightToPrioMap) {
+        super.collect(edgeFlags, way, wayTypeSpeed, weightToPrioMap);
 
         String highway = way.getTag("highway");
         if ("service".equals(highway)) {
