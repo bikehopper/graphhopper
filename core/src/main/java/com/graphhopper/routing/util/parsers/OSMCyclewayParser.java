@@ -68,11 +68,15 @@ public class OSMCyclewayParser implements TagParser {
       }
     }
 
+    if (readerWay.getId() == 986752740) {
+      System.out.println(readerWay);
+    }
+
     return edgeFlags;
   }
 
   protected boolean isOneway(ReaderWay way) {
-    return way.hasTag("oneway")
+    return way.hasTag("oneway", oneways)
         || way.hasTag("oneway:bicycle", oneways)
         || way.hasTag("cycleway:left:oneway", oneways)
         || way.hasTag("cycleway:right:oneway", oneways)
