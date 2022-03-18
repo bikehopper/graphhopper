@@ -19,6 +19,7 @@ package com.graphhopper.routing.util;
 
 import com.graphhopper.reader.ReaderWay;
 import com.graphhopper.routing.ev.*;
+import com.graphhopper.routing.util.countryrules.CountryRule;
 import com.graphhopper.routing.weighting.PriorityWeighting;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.Helper;
@@ -497,40 +498,38 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         }
 
         String cycleway = way.getFirstPriorityTag(Arrays.asList("cycleway", "cycleway:both"));
-        String cyclewayLeft = way.getTag("cycleway:left");
-        String cyclewayRight = way.getTag("cycleway:right");
+
+        // Determine the forward cycleway side from country rules
+        DrivingSide drivingSide = DrivingSide.find(way.getTag("driving_side"));
+        CountryRule countryRule = way.getTag("country_rule", null);
+        if (countryRule != null) {
+            drivingSide = countryRule.getDrivingSide(way, drivingSide);
+        }
+        String cyclewayForward = way.getTag("cycleway:" + drivingSide.toString());
+        String cyclewayBackward = way.getTag("cycleway:" + DrivingSide.reverse(drivingSide).toString());
+
         if (Arrays.asList("lane", "shared_lane", "share_busway", "shoulder").contains(cycleway)) {
             weightToPrioMap.put(100d, UNCHANGED.getValue());
-        } else if (Arrays.asList("lane", "shared_lane", "share_busway", "shoulder").contains(cyclewayLeft)) {
-            // On bidirectional streets in US, left is reverse
+        } else if ((isOneway(way) || roundaboutEnc.getBool(false, edgeFlags))
+                && (Arrays.asList("lane", "shared_lane", "share_busway", "shoulder").contains(cyclewayBackward)
+                        || Arrays.asList("lane", "shared_lane", "share_busway", "shoulder")
+                                .contains(cyclewayForward))) {
+            // On oneway streets, any accessible infrastructure works
+            weightToPrioMap.put(100d, UNCHANGED.getValue());
+        } else if (Arrays.asList("lane", "shared_lane", "share_busway", "shoulder").contains(cyclewayBackward)) {
             weightToPrioMap.put(true, 100d, UNCHANGED.getValue());
-            if (isOneway(way) || roundaboutEnc.getBool(false, edgeFlags)) {
-                // On oneway streets, any accessible infrastructure works
-                weightToPrioMap.put(false, 100d, UNCHANGED.getValue());
-            }
-        } else if (Arrays.asList("lane", "shared_lane", "share_busway", "shoulder").contains(cyclewayRight)) {
-            // On bidirectional streets in US, right is forward
+        } else if (Arrays.asList("lane", "shared_lane", "share_busway", "shoulder").contains(cyclewayForward)) {
             weightToPrioMap.put(false, 100d, UNCHANGED.getValue());
-            if (isOneway(way) || roundaboutEnc.getBool(false, edgeFlags)) {
-                // On oneway streets, any accessible infrastructure works
-                weightToPrioMap.put(true, 100d, UNCHANGED.getValue());
-            }
         } else if ("track".equals(cycleway)) {
             weightToPrioMap.put(100d, PREFER.getValue());
-        } else if ("track".equals(cyclewayLeft)) {
-            // On bidirectional streets in US, left is reverse
+        } else if ((isOneway(way) || roundaboutEnc.getBool(false, edgeFlags))
+                && Arrays.asList(cyclewayBackward, cyclewayForward).contains("track")) {
+            // On oneway streets, any accessible infrastructure works
+            weightToPrioMap.put(100d, PREFER.getValue());
+        } else if ("track".equals(cyclewayBackward)) {
             weightToPrioMap.put(true, 100d, PREFER.getValue());
-            if (isOneway(way) || roundaboutEnc.getBool(false, edgeFlags)) {
-                // On oneway streets, any accessible infrastructure works
-                weightToPrioMap.put(false, 100d, PREFER.getValue());
-            }
-        } else if ("track".equals(cyclewayRight)) {
-            // On bidirectional streets in US, right is forward
+        } else if ("track".equals(cyclewayForward)) {
             weightToPrioMap.put(false, 100d, PREFER.getValue());
-            if (isOneway(way) || roundaboutEnc.getBool(false, edgeFlags)) {
-                // On oneway streets, any accessible infrastructure works
-                weightToPrioMap.put(true, 100d, PREFER.getValue());
-            }
         }
 
         if (way.hasTag("bicycle", "use_sidepath")) {

@@ -19,6 +19,7 @@
 package com.graphhopper.routing.util.countryrules;
 
 import com.graphhopper.reader.ReaderWay;
+import com.graphhopper.routing.ev.DrivingSide;
 import com.graphhopper.routing.ev.MaxSpeed;
 import com.graphhopper.routing.ev.RoadAccess;
 import com.graphhopper.routing.ev.RoadClass;
@@ -31,7 +32,8 @@ import com.graphhopper.routing.util.TransportationMode;
 public class GermanyCountryRule implements CountryRule {
 
     /**
-     * In Germany there are roads without a speed limit. For these roads, this method
+     * In Germany there are roads without a speed limit. For these roads, this
+     * method
      * will return {@link MaxSpeed#UNLIMITED_SIGN_SPEED}.
      * <p>
      * Your implementation should be able to handle these cases.
@@ -42,7 +44,8 @@ public class GermanyCountryRule implements CountryRule {
             return currentMaxSpeed;
 
         RoadClass roadClass = RoadClass.find(readerWay.getTag("highway", ""));
-        // As defined in: https://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Maxspeed#Motorcar
+        // As defined in:
+        // https://wiki.openstreetmap.org/wiki/OSM_tags_for_routing/Maxspeed#Motorcar
         switch (roadClass) {
             case MOTORWAY:
             case TRUNK:
@@ -61,7 +64,8 @@ public class GermanyCountryRule implements CountryRule {
     }
 
     @Override
-    public RoadAccess getAccess(ReaderWay readerWay, TransportationMode transportationMode, RoadAccess currentRoadAccess) {
+    public RoadAccess getAccess(ReaderWay readerWay, TransportationMode transportationMode,
+            RoadAccess currentRoadAccess) {
         if (currentRoadAccess != RoadAccess.YES)
             return currentRoadAccess;
         if (!transportationMode.isMotorVehicle())
@@ -80,18 +84,27 @@ public class GermanyCountryRule implements CountryRule {
                 return RoadAccess.YES;
         }
     }
-    
+
     @Override
     public Toll getToll(ReaderWay readerWay, TransportationMode transportationMode, Toll currentToll) {
         if (!transportationMode.isMotorVehicle() || currentToll != Toll.MISSING) {
             return currentToll;
         }
-        
+
         RoadClass roadClass = RoadClass.find(readerWay.getTag("highway", ""));
         if (roadClass == RoadClass.MOTORWAY || roadClass == RoadClass.TRUNK || roadClass == RoadClass.PRIMARY) {
             return Toll.HGV;
         }
-        
+
         return currentToll;
+    }
+
+    @Override
+    public DrivingSide getDrivingSide(ReaderWay readerWay, DrivingSide currentDrivingSide) {
+        if (currentDrivingSide != DrivingSide.MISSING) {
+            return currentDrivingSide;
+        }
+
+        return DrivingSide.RIGHT;
     }
 }

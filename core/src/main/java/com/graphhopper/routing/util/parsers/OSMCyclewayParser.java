@@ -4,7 +4,9 @@ import com.graphhopper.reader.ReaderWay;
 import com.graphhopper.routing.ev.EncodedValue;
 import com.graphhopper.routing.ev.EncodedValueLookup;
 import com.graphhopper.routing.ev.EnumEncodedValue;
+import com.graphhopper.routing.util.countryrules.CountryRule;
 import com.graphhopper.routing.ev.Cycleway;
+import com.graphhopper.routing.ev.DrivingSide;
 import com.graphhopper.storage.IntsRef;
 
 import java.util.List;
@@ -48,28 +50,31 @@ public class OSMCyclewayParser implements TagParser {
     String cyclewayTag = readerWay
         .getFirstPriorityTag(Arrays.asList("cycleway", "cycleway:both"));
     Cycleway cycleway = Cycleway.find(cyclewayTag);
-    Cycleway cyclewayRight = Cycleway.find(readerWay.getTag("cycleway:right"));
-    Cycleway cyclewayLeft = Cycleway.find(readerWay.getTag("cycleway:left"));
+    
+    // Determine the forward cycleway side from country rules
+    DrivingSide drivingSide = DrivingSide.find(readerWay.getTag("driving_side"));
+    CountryRule countryRule = readerWay.getTag("country_rule", null);
+    if (countryRule != null) {
+        drivingSide = countryRule.getDrivingSide(readerWay, drivingSide);
+    }
+    Cycleway cyclewayForward = Cycleway.find(readerWay.getTag("cycleway:" + drivingSide.toString()));
+    Cycleway cyclewayBackward = Cycleway.find(readerWay.getTag("cycleway:" + DrivingSide.reverse(drivingSide).toString()));
 
     if (cycleway != Cycleway.MISSING) {
       cyclewayEnc.setEnum(false, edgeFlags, cycleway);
       cyclewayEnc.setEnum(true, edgeFlags, cycleway);
     }
-    if (cyclewayRight != Cycleway.MISSING) {
-      cyclewayEnc.setEnum(false, edgeFlags, cyclewayRight);
+    if (cyclewayForward != Cycleway.MISSING) {
+      cyclewayEnc.setEnum(false, edgeFlags, cyclewayForward);
       if (isOneway(readerWay)) {
-        cyclewayEnc.setEnum(true, edgeFlags, cyclewayRight);
+        cyclewayEnc.setEnum(true, edgeFlags, cyclewayForward);
       }
     }
-    if (cyclewayLeft != Cycleway.MISSING) {
-      cyclewayEnc.setEnum(true, edgeFlags, cyclewayLeft);
+    if (cyclewayBackward != Cycleway.MISSING) {
+      cyclewayEnc.setEnum(true, edgeFlags, cyclewayBackward);
       if (isOneway(readerWay)) {
-        cyclewayEnc.setEnum(false, edgeFlags, cyclewayLeft);
+        cyclewayEnc.setEnum(false, edgeFlags, cyclewayBackward);
       }
-    }
-
-    if (readerWay.getId() == 986752740) {
-      System.out.println(readerWay);
     }
 
     return edgeFlags;
