@@ -481,25 +481,25 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
                 weightToPrioMap.put(50d, AVOID_MORE.getValue());
         }
 
-        String cycleway = way.getFirstPriorityTag(Arrays.asList("cycleway", "cycleway:both"));
-
         // Determine the forward cycleway side from country rules
         DrivingSide drivingSide = DrivingSide.find(way.getTag("driving_side"));
         CountryRule countryRule = way.getTag("country_rule", null);
         if (countryRule != null) {
             drivingSide = countryRule.getDrivingSide(way, drivingSide);
         }
-        String cyclewayForward = way.getTag("cycleway:" + drivingSide.toString());
-        String cyclewayBackward = way.getTag("cycleway:" + DrivingSide.reverse(drivingSide).toString());
-        boolean isOneway = isOneway(way) || roundaboutEnc.getBool(false, edgeFlags);
+
+        String cycleway = way.getFirstPriorityTag(Arrays.asList("cycleway", "cycleway:both")),
+                cyclewayForward = way.getTag("cycleway:" + drivingSide.toString()),
+                cyclewayBackward = way.getTag("cycleway:" + DrivingSide.reverse(drivingSide).toString());
 
         Integer cyclewayPriority = cyclewayMap.get(cycleway),
                 cyclewayForwardPriority = cyclewayMap.get(cyclewayForward),
                 cyclewayBackwardPriority = cyclewayMap.get(cyclewayBackward);
+
         if (Objects.nonNull(cyclewayPriority)) {
             weightToPrioMap.put(100d, cyclewayPriority);
         }
-        if (isOneway) {
+        if (isOneway(way) || roundaboutEnc.getBool(false, edgeFlags)) {
             // On oneway streets, any accessible infrastructure works
             Stream.of(cyclewayForwardPriority, cyclewayBackwardPriority)
                     .filter(Objects::nonNull)
