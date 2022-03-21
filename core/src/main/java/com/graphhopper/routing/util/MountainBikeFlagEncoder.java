@@ -21,8 +21,6 @@ import com.graphhopper.reader.ReaderWay;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.PMap;
 
-import java.util.TreeMap;
-
 import static com.graphhopper.routing.ev.RouteNetwork.*;
 import static com.graphhopper.routing.util.PriorityCode.*;
 
@@ -53,7 +51,7 @@ public class MountainBikeFlagEncoder extends BikeCommonFlagEncoder {
         setTrackTypeSpeed("grade2", 16); // now unpaved ...
         setTrackTypeSpeed("grade3", 12);
         setTrackTypeSpeed("grade4", 8);
-        setTrackTypeSpeed("grade5", 6); // like sand/grass
+        setTrackTypeSpeed("grade5", 6); // like sand/grass     
 
         setSurfaceSpeed("paved", 18);
         setSurfaceSpeed("asphalt", 18);
@@ -135,10 +133,8 @@ public class MountainBikeFlagEncoder extends BikeCommonFlagEncoder {
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.VERY_BAD, 0.6d);
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.HORRIBLE, 0.5d);
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.VERY_HORRIBLE, 0.4d);
-        // SmoothnessSpeed <= smoothnessFactorPushingSectionThreshold gets mapped to
-        // speed PUSHING_SECTION_SPEED
-        setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.IMPASSABLE,
-                smoothnessFactorPushingSectionThreshold);
+        // SmoothnessSpeed <= smoothnessFactorPushingSectionThreshold gets mapped to speed PUSHING_SECTION_SPEED
+        setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.IMPASSABLE, smoothnessFactorPushingSectionThreshold);
 
         passByDefaultBarriers.add("kissing_gate");
         passByDefaultBarriers.add("stile");
@@ -165,8 +161,7 @@ public class MountainBikeFlagEncoder extends BikeCommonFlagEncoder {
 
     @Override
     boolean isSacScaleAllowed(String sacScale) {
-        // other scales are too dangerous even for MTB, see
-        // http://wiki.openstreetmap.org/wiki/Key:sac_scale
+        // other scales are too dangerous even for MTB, see http://wiki.openstreetmap.org/wiki/Key:sac_scale
         return "hiking".equals(sacScale) || "mountain_hiking".equals(sacScale)
                 || "demanding_mountain_hiking".equals(sacScale) || "alpine_hiking".equals(sacScale);
     }
