@@ -25,6 +25,7 @@ import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.Helper;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.graphhopper.routing.ev.RouteNetwork.*;
 import static com.graphhopper.routing.util.EncodingManager.getKey;
@@ -59,6 +60,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
     EnumEncodedValue<RouteNetwork> bikeRouteEnc;
     EnumEncodedValue<Smoothness> smoothnessEnc;
     Map<RouteNetwork, Integer> routeMap = new HashMap<>();
+    Map<String, Integer> cyclewayMap = new HashMap<>();
 
     // This is the specific bicycle class
     private String classBicycleKey;
@@ -182,6 +184,12 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         routeMap.put(NATIONAL, BEST.getValue());
         routeMap.put(REGIONAL, VERY_NICE.getValue());
         routeMap.put(LOCAL, PREFER.getValue());
+
+        cyclewayMap.put("lane", UNCHANGED.getValue());
+        cyclewayMap.put("shared_lane", UNCHANGED.getValue());
+        cyclewayMap.put("share_busway", UNCHANGED.getValue());
+        cyclewayMap.put("shoulder", UNCHANGED.getValue());
+        cyclewayMap.put("track", PREFER.getValue());
 
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.MISSING, 1.0d);
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.OTHER, 0.7d);
@@ -483,29 +491,26 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         }
         String cyclewayForward = way.getTag("cycleway:" + drivingSide.toString());
         String cyclewayBackward = way.getTag("cycleway:" + DrivingSide.reverse(drivingSide).toString());
+        boolean isOneway = isOneway(way) || roundaboutEnc.getBool(false, edgeFlags);
 
-        if (Arrays.asList("lane", "shared_lane", "share_busway", "shoulder").contains(cycleway)) {
-            weightToPrioMap.put(100d, UNCHANGED.getValue());
-        } else if ((isOneway(way) || roundaboutEnc.getBool(false, edgeFlags))
-                && (Arrays.asList("lane", "shared_lane", "share_busway", "shoulder").contains(cyclewayBackward)
-                        || Arrays.asList("lane", "shared_lane", "share_busway", "shoulder")
-                                .contains(cyclewayForward))) {
+        Integer cyclewayPriority = cyclewayMap.get(cycleway),
+                cyclewayForwardPriority = cyclewayMap.get(cyclewayForward),
+                cyclewayBackwardPriority = cyclewayMap.get(cyclewayBackward);
+        if (Objects.nonNull(cyclewayPriority)) {
+            weightToPrioMap.put(100d, cyclewayPriority);
+        }
+        if (isOneway) {
             // On oneway streets, any accessible infrastructure works
-            weightToPrioMap.put(100d, UNCHANGED.getValue());
-        } else if (Arrays.asList("lane", "shared_lane", "share_busway", "shoulder").contains(cyclewayBackward)) {
-            weightToPrioMap.put(true, 100d, UNCHANGED.getValue());
-        } else if (Arrays.asList("lane", "shared_lane", "share_busway", "shoulder").contains(cyclewayForward)) {
-            weightToPrioMap.put(false, 100d, UNCHANGED.getValue());
-        } else if ("track".equals(cycleway)) {
-            weightToPrioMap.put(100d, PREFER.getValue());
-        } else if ((isOneway(way) || roundaboutEnc.getBool(false, edgeFlags))
-                && Arrays.asList(cyclewayBackward, cyclewayForward).contains("track")) {
-            // On oneway streets, any accessible infrastructure works
-            weightToPrioMap.put(100d, PREFER.getValue());
-        } else if ("track".equals(cyclewayBackward)) {
-            weightToPrioMap.put(true, 100d, PREFER.getValue());
-        } else if ("track".equals(cyclewayForward)) {
-            weightToPrioMap.put(false, 100d, PREFER.getValue());
+            Stream.of(cyclewayForwardPriority, cyclewayBackwardPriority)
+                    .filter(Objects::nonNull)
+                    .forEach(p -> weightToPrioMap.put(100d, p));
+        } else {
+            if (Objects.nonNull(cyclewayForwardPriority)) {
+                weightToPrioMap.put(false, 100d, cyclewayForwardPriority);
+            }
+            if (Objects.nonNull(cyclewayBackwardPriority)) {
+                weightToPrioMap.put(true, 100d, cyclewayBackwardPriority);
+            }
         }
 
         if (way.hasTag("bicycle", "use_sidepath")) {
@@ -551,29 +556,9 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
     protected void handleSpeed(IntsRef edgeFlags, ReaderWay way, double speed) {
         avgSpeedEnc.setDecimal(false, edgeFlags, speed);
 
-        // handle oneways
-        // oneway=-1 requires special handling
-        boolean isOneway = (way.hasTag("oneway", oneways) && !way.hasTag("oneway", "-1") && !way.hasTag("bicycle:backward", intendedValues))
-                || (way.hasTag("oneway", "-1") && !way.hasTag("bicycle:forward", intendedValues))
-                || way.hasTag("oneway:bicycle", oneways)
-                || (way.hasTag("vehicle:backward", restrictedValues) && !way.hasTag("bicycle:forward", intendedValues))
-                || (way.hasTag("vehicle:forward", restrictedValues) && !way.hasTag("bicycle:backward", intendedValues))
-                || way.hasTag("bicycle:forward", restrictedValues)
-                || way.hasTag("bicycle:backward", restrictedValues);
-
-        if ((isOneway || roundaboutEnc.getBool(false, edgeFlags))
-                && !way.hasTag("oneway:bicycle", "no")
-                && !way.hasTag("cycleway", oppositeLanes)
-                && !way.hasTag("cycleway:left", oppositeLanes)
-                && !way.hasTag("cycleway:right", oppositeLanes)
-                && !way.hasTag("cycleway:left:oneway", "-1")
-                && !way.hasTag("cycleway:right:oneway", "-1")) {
-            boolean isBackward = way.hasTag("oneway", "-1")
-                    || way.hasTag("oneway:bicycle", "-1")
-                    || way.hasTag("vehicle:forward", restrictedValues)
-                    || way.hasTag("bicycle:forward", restrictedValues);
+        if (isOneway(way) || roundaboutEnc.getBool(false, edgeFlags)) {
+            boolean isBackward = isBackwardOneway(way);
             accessEnc.setBool(isBackward, edgeFlags, true);
-
         } else {
             accessEnc.setBool(false, edgeFlags, true);
             accessEnc.setBool(true, edgeFlags, true);
@@ -633,21 +618,6 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
                 || way.hasTag("cycleway", oppositeLanes)
                 || way.hasTag("cycleway:left", oppositeLanes)
                 || way.hasTag("cycleway:right", oppositeLanes);
-    }
-
-    /**
-     * make sure that isOneway is called before
-     */
-    protected boolean isForwardOneway(ReaderWay way) {
-        return !way.hasTag("oneway", "-1")
-                && !way.hasTag("oneway:bicycle", "-1")
-                && !way.hasTag("cycleway:left:oneway", "-1")
-                && !way.hasTag("cycleway:right:oneway", "-1")
-                && !way.hasTag("vehicle:forward", restrictedValues)
-                && !way.hasTag("bicycle:forward", restrictedValues)
-                && !way.hasTag("cycleway", oppositeLanes)
-                && !way.hasTag("cycleway:left", oppositeLanes)
-                && !way.hasTag("cycleway:right", oppositeLanes);
     }
 
     protected boolean isOneway(ReaderWay way) {
