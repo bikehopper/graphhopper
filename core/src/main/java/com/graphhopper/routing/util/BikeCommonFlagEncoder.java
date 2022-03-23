@@ -405,7 +405,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
      * the tags in ReaderWay.
      */
     void handlePriority(IntsRef edgeFlags, ReaderWay way, double wayTypeSpeed, Integer priorityFromRelation) {
-        TwoDirectionsPriorityMap weightToPrioMap = new TwoDirectionsPriorityMap();
+        BidirectionalTreeMap weightToPrioMap = new BidirectionalTreeMap();
         if (priorityFromRelation == null)
             weightToPrioMap.put(0d, UNCHANGED.getValue());
         else
@@ -450,7 +450,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
      * @param weightToPrioMap associate a weight with every priority. This sorted map allows
      *                        subclasses to 'insert' more important priorities as well as overwrite determined priorities.
      */
-    void collect(IntsRef edgeFlags, ReaderWay way, double wayTypeSpeed, TwoDirectionsPriorityMap weightToPrioMap) {
+    void collect(IntsRef edgeFlags, ReaderWay way, double wayTypeSpeed, BidirectionalTreeMap weightToPrioMap) {
         String service = way.getTag("service");
         String highway = way.getTag("highway");
         if (way.hasTag("bicycle", "designated") || way.hasTag("bicycle", "official")) {

@@ -24,11 +24,11 @@ import java.util.Map.Entry;
  * A simple wrapper around two Maps that stores directionally-aware priority
  * values.
  */
-public class TwoDirectionsPriorityMap {
+public class BidirectionalTreeMap {
   private TreeMap<Double, Integer> forward;
   private TreeMap<Double, Integer> backward;
 
-  TwoDirectionsPriorityMap() {
+  BidirectionalTreeMap() {
     this.forward = new TreeMap<>();
     this.backward = new TreeMap<>();
   }

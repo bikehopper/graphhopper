@@ -144,7 +144,7 @@ public class MountainBikeFlagEncoder extends BikeCommonFlagEncoder {
     }
 
     @Override
-    void collect(IntsRef edgeFlags, ReaderWay way, double wayTypeSpeed, TwoDirectionsPriorityMap weightToPrioMap) {
+    void collect(IntsRef edgeFlags, ReaderWay way, double wayTypeSpeed, BidirectionalTreeMap weightToPrioMap) {
         super.collect(edgeFlags, way, wayTypeSpeed, weightToPrioMap);
 
         String highway = way.getTag("highway");
