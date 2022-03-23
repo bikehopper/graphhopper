@@ -52,8 +52,7 @@ public class AustriaCountryRule implements CountryRule {
     }
 
     @Override
-    public RoadAccess getAccess(ReaderWay readerWay, TransportationMode transportationMode,
-            RoadAccess currentRoadAccess) {
+    public RoadAccess getAccess(ReaderWay readerWay, TransportationMode transportationMode, RoadAccess currentRoadAccess) {
         if (currentRoadAccess != RoadAccess.YES)
             return currentRoadAccess;
         if (!transportationMode.isMotorVehicle())
