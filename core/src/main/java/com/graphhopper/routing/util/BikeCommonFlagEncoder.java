@@ -62,7 +62,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
     EnumEncodedValue<RouteNetwork> bikeRouteEnc;
     EnumEncodedValue<Smoothness> smoothnessEnc;
     Map<RouteNetwork, Integer> routeMap = new HashMap<>();
-    Map<Cycleway, Integer> cyclewayMap = new HashMap<>();
+    Map<Cycleway, Integer> cyclewayMap = new EnumMap<>(Cycleway.class);
     Map<String, Integer> highwayMap = new HashMap<>();
 
     // This is the specific bicycle class
@@ -549,12 +549,16 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
                 cyclewayForward = Cycleway.find(way.getTag("cycleway:" + drivingSide.toString())),
                 cyclewayBackward = Cycleway.find(way.getTag("cycleway:" + DrivingSide.reverse(drivingSide).toString()));
 
-        Integer cyclewayPriority = withTrafficCyclewayTags.contains(cycleway) ? highwayPriority + 1
-                : cyclewayMap.get(cycleway),
-                cyclewayForwardPriority = withTrafficCyclewayTags.contains(cyclewayForward) ? highwayPriority + 1
-                        : cyclewayMap.get(cyclewayForward),
-                cyclewayBackwardPriority = withTrafficCyclewayTags.contains(cyclewayBackward) ? highwayPriority + 1
-                        : cyclewayMap.get(cyclewayBackward);
+        Integer cyclewayPriority = cyclewayMap.get(cycleway),
+                cyclewayForwardPriority = cyclewayMap.get(cyclewayForward),
+                cyclewayBackwardPriority = cyclewayMap.get(cyclewayBackward);
+
+        if (withTrafficCyclewayTags.contains(cycleway))
+            cyclewayPriority = highwayPriority + 1;
+        if (withTrafficCyclewayTags.contains(cyclewayForward))
+            cyclewayForwardPriority = highwayPriority + 1;
+        if (withTrafficCyclewayTags.contains(cyclewayBackward))
+            cyclewayBackwardPriority = highwayPriority + 1;
 
         if (Objects.nonNull(cyclewayPriority)) {
             weightToPrioMap.put(CYCLE_INFRA_KEY, cyclewayPriority);
