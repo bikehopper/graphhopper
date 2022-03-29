@@ -572,7 +572,8 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
 
         String classBicycleValue = way.getTag(classBicycleKey);
         if (classBicycleValue != null) {
-            // We assume that humans are better in classifying preferences compared to our algorithm above -> weight = 100
+            // We assume that humans are better in classifying preferences compared to our
+            // algorithm above
             weightToPrioMap.put(CYCLE_INFRA_KEY, convertClassValueToPriority(classBicycleValue).getValue());
         } else {
             String classBicycle = way.getTag("class:bicycle");
