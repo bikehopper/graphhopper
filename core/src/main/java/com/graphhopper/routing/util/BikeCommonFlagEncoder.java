@@ -531,6 +531,12 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         if (way.hasTag("cyclestreet", intendedValues)) {
             weightToPrioMap.put(CYCLE_INFRA_KEY, cyclewayMap.get(SHARED_LANE));
         }
+        if (way.hasTag("motor_vehicle", "destination")) {
+            weightToPrioMap.put(CYCLE_INFRA_KEY, cyclewayMap.get(SHARED_LANE) + 1);
+        }
+        if (way.hasTag("motor_vehicle", restrictedValues)) {
+            weightToPrioMap.put(CYCLE_INFRA_KEY, BEST.getValue());
+        }
 
         DrivingSide drivingSide = DrivingSide.find(way.getTag("driving_side"));
         CountryRule countryRule = way.getTag("country_rule", null);
