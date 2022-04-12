@@ -20,6 +20,7 @@ package com.graphhopper.routing.util;
 import com.graphhopper.reader.OSMTurnRelation;
 import com.graphhopper.reader.ReaderRelation;
 import com.graphhopper.reader.ReaderWay;
+import com.graphhopper.reader.osm.OSMJunction;
 import com.graphhopper.reader.osm.conditional.DateRangeParser;
 import com.graphhopper.routing.ev.*;
 import com.graphhopper.routing.util.parsers.*;
@@ -54,6 +55,7 @@ public class TagParserManager implements EncodedValueLookup {
     private final EncodedValue.InitializerConfig turnCostConfig;
     private final EncodedValue.InitializerConfig relationConfig;
     private final EncodedValue.InitializerConfig edgeConfig;
+    private final Map<String, JunctionCostParser> junctionCostParsers = new LinkedHashMap<>();
     private EncodingManager encodingManager;
 
     /**
@@ -128,6 +130,7 @@ public class TagParserManager implements EncodedValueLookup {
         turnCostParsers.clear();
         edgeTagParsers.clear();
         relationTagParsers.clear();
+        junctionCostParsers.clear();
     }
 
     public static class Builder {
@@ -138,6 +141,7 @@ public class TagParserManager implements EncodedValueLookup {
         private final Set<TagParser> tagParserSet = new LinkedHashSet<>();
         private final List<TurnCostParser> turnCostParsers = new ArrayList<>();
         private final List<RelationTagParser> relationTagParsers = new ArrayList<>();
+        private final List<JunctionCostParser> junctionCostParsers = new ArrayList<>();
 
         public Builder() {
             em = new TagParserManager();
@@ -181,6 +185,12 @@ public class TagParserManager implements EncodedValueLookup {
         public Builder addRelationTagParser(RelationTagParser tagParser) {
             check();
             relationTagParsers.add(tagParser);
+            return this;
+        }
+
+        public Builder addJunctionCostParser(JunctionCostParser parser) {
+            check();
+            junctionCostParsers.add(parser);
             return this;
         }
 
@@ -259,6 +269,19 @@ public class TagParserManager implements EncodedValueLookup {
             em.turnCostParsers.put(parser.getName(), parser);
         }
 
+        private void _addJunctionCostParser(JunctionCostParser parser) {
+            List<EncodedValue> list = new ArrayList<>();
+            parser.createTurnCostEncodedValues(em, list);
+            for (EncodedValue ev : list) {
+                ev.init(em.turnCostConfig);
+                if (em.encodedValueMap.containsKey(ev.getName()))
+                    throw new IllegalArgumentException("Already defined: " + ev.getName() + ". Please note that " +
+                            "EncodedValues for edges and turn cost are in the same namespace.");
+                em.encodedValueMap.put(ev.getName(), ev);
+            }
+            em.junctionCostParsers.put(parser.getName(), parser);
+        }
+
         public TagParserManager build() {
             check();
 
@@ -323,12 +346,17 @@ public class TagParserManager implements EncodedValueLookup {
                 _addTurnCostParser(parser);
             }
 
+            for (JunctionCostParser parser : junctionCostParsers) {
+                _addJunctionCostParser(parser);
+            }
+
             // FlagEncoder can demand TurnCostParsers => add them after the explicitly added ones
             for (AbstractFlagEncoder encoder : flagEncoderMap.values()) {
                 if (encoder.supportsTurnCosts() && !em.turnCostParsers.containsKey(TurnCost.key(encoder.toString()))) {
                     BooleanEncodedValue accessEnc = encoder.getAccessEnc();
                     DecimalEncodedValue turnCostEnc = TurnCost.create(encoder.toString(), encoder.getMaxTurnCosts());
                     _addTurnCostParser(new OSMTurnRelationParser(accessEnc, turnCostEnc, encoder.getRestrictions()));
+                    _addJunctionCostParser(new OSMJunctionParser(turnCostEnc));
                 }
             }
 
@@ -453,6 +481,12 @@ public class TagParserManager implements EncodedValueLookup {
     public void handleTurnRelationTags(OSMTurnRelation turnRelation, TurnCostParser.ExternalInternalMap map, Graph graph) {
         for (TurnCostParser parser : turnCostParsers.values()) {
             parser.handleTurnRelationTags(turnRelation, map, graph);
+        }
+    }
+
+    public void handleJunctionTags(OSMJunction junction, JunctionCostParser.ExternalInternalMap map, Graph graph) {
+        for (JunctionCostParser junctionCostParser : junctionCostParsers.values()) {
+            junctionCostParser.handleJunctionTags(junction, map, graph);
         }
     }
 
