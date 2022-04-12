@@ -33,6 +33,7 @@ import com.graphhopper.routing.util.CustomArea;
 import com.graphhopper.routing.util.TagParserManager;
 import com.graphhopper.routing.util.countryrules.CountryRule;
 import com.graphhopper.routing.util.countryrules.CountryRuleFactory;
+import com.graphhopper.routing.util.parsers.JunctionCostParser;
 import com.graphhopper.routing.util.parsers.TurnCostParser;
 import com.graphhopper.storage.BaseGraph;
 import com.graphhopper.storage.IntsRef;
@@ -152,11 +153,12 @@ public class OSMReader {
                 .setDirectory(baseGraph.getDirectory())
                 .setElevationProvider(eleProvider)
                 .setWayFilter(this::acceptWay)
-                .setSplitNodeFilter(this::isBarrierNode)
+                .setSplitNodeFilter(this::isSplitNode)
                 .setWayPreprocessor(this::preprocessWay)
                 .setRelationPreprocessor(this::preprocessRelations)
                 .setRelationProcessor(this::processRelation)
                 .setEdgeHandler(this::addEdge)
+                .setJunctionHandler(this::handleJunction)
                 .setWorkerThreads(config.getWorkerThreads())
                 .build();
         waySegmentParser.readOSM(osmFile);
@@ -195,8 +197,14 @@ public class OSMReader {
      * @return true if the given node should be duplicated to create an artificial edge. If the node turns out to be a
      * junction between different ways this will be ignored and no artificial edge will be created.
      */
-    protected boolean isBarrierNode(ReaderNode node) {
-        return node.getTags().containsKey("barrier") || node.getTags().containsKey("ford");
+    protected boolean isSplitNode(ReaderNode node) {
+        if (node.getTags().containsKey("barrier"))
+            return true;
+        if (node.getTags().containsKey("ford"))
+            return true;
+        if (node.hasTag("highway", "stop"))
+            return true;
+        return false;
     }
 
     /**
@@ -275,7 +283,8 @@ public class OSMReader {
      * @param way       the OSM way this segment was taken from
      * @param nodeTags  node tags of this segment if it is an artificial edge, empty otherwise
      */
-    protected void addEdge(int fromIndex, int toIndex, PointList pointList, ReaderWay way, Map<String, Object> nodeTags) {
+    protected EdgeIteratorState addEdge(int fromIndex, int toIndex, PointList pointList, ReaderWay way,
+            Map<String, Object> nodeTags) {
         // sanity checks
         if (fromIndex < 0 || toIndex < 0)
             throw new AssertionError("to or from index is invalid for this edge " + fromIndex + "->" + toIndex + ", points:" + pointList);
@@ -333,7 +342,7 @@ public class OSMReader {
         IntsRef relationFlags = getRelFlagsMap(way.getId());
         IntsRef edgeFlags = tagParserManager.handleWayTags(way, relationFlags);
         if (edgeFlags.isEmpty())
-            return;
+            return null;
 
         String name = way.getTag("way_name", "");
         EdgeIteratorState edge = baseGraph.edge(fromIndex, toIndex).setDistance(distance).setGrade(grade)
@@ -353,6 +362,27 @@ public class OSMReader {
         if (osmWayIdSet.contains(way.getId())) {
             getEdgeIdToOsmWayIdMap().put(edge.getEdge(), way.getId());
         }
+
+        return edge;
+    }
+
+    private void handleJunction(OSMJunction junction, OSMNodeData nodeData, LongToIntFunction getIdForOSMNodeId) {
+        if (turnCostStorage == null)
+            return;
+
+        JunctionCostParser.ExternalInternalMap map = new JunctionCostParser.ExternalInternalMap() {
+            @Override
+            public int getInternalNodeIdOfOsmNode(long nodeOsmId) {
+                return getIdForOSMNodeId.applyAsInt(nodeOsmId);
+            }
+
+            @Override
+            public long getOsmIdOfInternalEdge(int edgeId) {
+                return getEdgeIdToOsmWayIdMap().get(edgeId);
+            }
+        };
+
+        tagParserManager.handleJunctionTags(junction, map, baseGraph);
     }
 
     private void checkCoordinates(int nodeIndex, GHPoint point) {
