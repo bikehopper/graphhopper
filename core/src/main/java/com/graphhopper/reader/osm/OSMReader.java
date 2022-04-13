@@ -371,6 +371,11 @@ public class OSMReader {
             public long getOsmIdOfInternalEdge(int edgeId) {
                 return getEdgeIdToOsmWayIdMap().get(edgeId);
             }
+
+            @Override
+            public Map<String, Object> getNodeTagsOfOsmNode(long nodeOsmId) {
+                return nodeData.getTags(nodeOsmId);
+            }
         };
 
         tagParserManager.handleJunctionTags(junction, map, baseGraph);
