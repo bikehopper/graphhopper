@@ -40,7 +40,7 @@ public class PenaltyWeighting extends FastestWeighting {
     public PenaltyWeighting(FlagEncoder encoder, PMap pMap, TurnCostProvider turnCostProvider) {
         super(encoder, pMap, turnCostProvider);
         penaltyEnc = encoder.getDecimalEncodedValue(EncodingManager.getKey(encoder, "penalty"));
-        minFactor = 1 / PenaltyCode.getValue(EXCLUDE.getValue());
+        minFactor = 1;
         maxPenalty = PenaltyCode.getFactor(EXCLUDE.getValue());
     }
 

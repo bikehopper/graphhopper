@@ -48,7 +48,7 @@ public enum PenaltyCode {
     }
 
     public static double getFactor(int value) {
-        return (double) value / 10.0;
+        return (double) value;
     }
 
     public static double getValue(int value) {
