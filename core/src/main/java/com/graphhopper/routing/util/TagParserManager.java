@@ -272,13 +272,6 @@ public class TagParserManager implements EncodedValueLookup {
         private void _addJunctionCostParser(JunctionCostParser parser) {
             List<EncodedValue> list = new ArrayList<>();
             parser.createTurnCostEncodedValues(em, list);
-            for (EncodedValue ev : list) {
-                ev.init(em.turnCostConfig);
-                if (em.encodedValueMap.containsKey(ev.getName()))
-                    throw new IllegalArgumentException("Already defined: " + ev.getName() + ". Please note that " +
-                            "EncodedValues for edges and turn cost are in the same namespace.");
-                em.encodedValueMap.put(ev.getName(), ev);
-            }
             em.junctionCostParsers.put(parser.getName(), parser);
         }
 

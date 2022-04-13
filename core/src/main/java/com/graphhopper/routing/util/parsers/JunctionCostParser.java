@@ -6,6 +6,7 @@ import com.graphhopper.routing.ev.EncodedValueLookup;
 import com.graphhopper.storage.Graph;
 
 import java.util.List;
+import java.util.Map;
 
 public interface JunctionCostParser {
   String getName();
@@ -24,5 +25,7 @@ public interface JunctionCostParser {
     int getInternalNodeIdOfOsmNode(long nodeOsmId);
 
     long getOsmIdOfInternalEdge(int edgeId);
+
+    Map<String, Object> getNodeTagsOfOsmNode(long nodeOsmId);
   }
 }
