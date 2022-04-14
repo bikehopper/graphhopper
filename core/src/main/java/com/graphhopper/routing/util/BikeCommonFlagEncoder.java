@@ -185,7 +185,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         routeMap.put(REGIONAL, VERY_NICE.getValue());
         routeMap.put(LOCAL, PREFER.getValue());
 
-        cyclewayMap.put(SEPARATE, SLIGHT_AVOID.getValue());
+        cyclewayMap.put(SEPARATE, REACH_DESTINATION.getValue());
         cyclewayMap.put(SHOULDER, UNCHANGED.getValue());
         cyclewayMap.put(SHARED_LANE, SLIGHT_PREFER.getValue());
         cyclewayMap.put(SHARE_BUSWAY, SLIGHT_PREFER.getValue());
