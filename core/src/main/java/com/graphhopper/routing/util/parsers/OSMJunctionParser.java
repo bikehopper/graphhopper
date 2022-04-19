@@ -37,9 +37,6 @@ public class OSMJunctionParser implements JunctionCostParser {
   public void handleJunctionTags(OSMJunction junction, ExternalInternalMap map, Graph graph) {
     Integer viaNode = map.getInternalNodeIdOfOsmNode(junction.getJunctionNodeId());
     boolean isControlled = isControlled(map, junction);
-    if (junction.getJunctionNodeId() == 531239900 || junction.getJunctionNodeId() == 694066163) {
-      System.out.println("hello");
-    }
 
     for (Entry<Integer, ReaderWay> from : junction.getWays().entrySet()) {
       Integer fromEdge = from.getKey();
