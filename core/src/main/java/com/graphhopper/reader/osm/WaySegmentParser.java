@@ -241,18 +241,32 @@ public class WaySegmentParser {
 
             acceptedNodes++;
 
+            boolean keepTags = false;
             // we keep node tags for barrier nodes
             if (splitNodeFilter.test(node)) {
                 if (nodeType == JUNCTION_NODE) {
                     LOGGER.debug("OSM node {} at {},{} is a barrier node at a junction. The barrier will be ignored",
                             node.getId(), Helper.round(node.getLat(), 7), Helper.round(node.getLon(), 7));
                     ignoredSplitNodes++;
-                } else
-                    nodeData.setTags(node);
+                } else {
+                    keepTags = true;
+                    nodeData.setSplit(node);
+                }
             }
+
+            // also keep node tags for traffic control nodes
+            if (node.hasTag("highway", "stop", "traffic_signals")) {
+                keepTags = true;
+            }
+
             if (nodeType == JUNCTION_NODE) {
                 OSMJunction junction = new OSMJunction(node.getId());
                 junctions.put(node.getId(), junction);
+            }
+
+            if (keepTags) {
+                // this function must only be called once per node
+                nodeData.setTags(node);
             }
         }
 
@@ -328,7 +342,7 @@ public class WaySegmentParser {
                 SegmentNode node = parentSegment.get(i);
                 Map<String, Object> nodeTags = nodeData.getTags(node.osmNodeId);
                 // so far we only consider node tags of split nodes, so if there are node tags we split the node
-                if (!nodeTags.isEmpty()) {
+                if (nodeData.getSplit(node.osmNodeId) && !nodeTags.isEmpty()) {
                     // this node is a barrier. we will copy it and add an extra edge
                     SegmentNode barrierFrom = node;
                     SegmentNode barrierTo = nodeData.addCopyOfNode(node);

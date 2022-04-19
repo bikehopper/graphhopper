@@ -202,8 +202,6 @@ public class OSMReader {
             return true;
         if (node.getTags().containsKey("ford"))
             return true;
-        if (node.hasTag("highway", "stop"))
-            return true;
         return false;
     }
 
