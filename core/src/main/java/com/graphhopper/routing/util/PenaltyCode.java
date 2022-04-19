@@ -17,38 +17,41 @@
  */
 package com.graphhopper.routing.util;
 
-import java.util.TreeMap;
-import java.util.Map.Entry;
-
 /**
- * A simple wrapper around two Maps that stores directionally-aware values.
+ * Used to store a penalty value in the way flags of an edge. Used in
+ * combination with PenaltyWeighting
+ *
+ * @author Hazel Court
  */
-public class BidirectionalTreeMap<Key, Value> {
-  private TreeMap<Key, Value> forward;
-  private TreeMap<Key, Value> backward;
+public enum PenaltyCode {
+    EXCLUDE(15),
+    REACH_DESTINATION(12),
+    VERY_BAD(9.5),
+    BAD(9.0),
+    AVOID_MORE(8.5),
+    AVOID(8.0),
+    SLIGHT_AVOID(7.5),
+    UNCHANGED(5.0),
+    SLIGHT_PREFER(2.5),
+    PREFER(2.0),
+    VERY_NICE(1.5),
+    BEST(1.0);
 
-  BidirectionalTreeMap() {
-    this.forward = new TreeMap<>();
-    this.backward = new TreeMap<>();
-  }
+    private final double value;
 
-  public void put(boolean reverse, Key key, Value value) {
-    if (reverse) {
-      this.backward.put(key, value);
-    } else {
-      this.forward.put(key, value);
+    PenaltyCode(double value) {
+        this.value = value;
     }
-  }
 
-  public void put(Key key, Value value) {
-    this.forward.put(key, value);
-    this.backward.put(key, value);
-  }
-
-  public Entry<Key, Value> lastEntry(boolean reverse) {
-    if (reverse) {
-      return this.backward.lastEntry();
+    public double getValue() {
+        return value;
     }
-    return this.forward.lastEntry();
-  }
+
+    public static double getFactor(double value) {
+        return (double) value;
+    }
+
+    public static double getValue(double value) {
+        return getFactor(value);
+    }
 }
