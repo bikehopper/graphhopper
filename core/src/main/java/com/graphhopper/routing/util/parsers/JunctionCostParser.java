@@ -4,6 +4,7 @@ import com.graphhopper.reader.osm.OSMJunction;
 import com.graphhopper.routing.ev.EncodedValue;
 import com.graphhopper.routing.ev.EncodedValueLookup;
 import com.graphhopper.storage.Graph;
+import com.graphhopper.util.shapes.GHPoint3D;
 
 import java.util.List;
 import java.util.Map;
@@ -27,5 +28,7 @@ public interface JunctionCostParser {
     long getOsmIdOfInternalEdge(int edgeId);
 
     Map<String, Object> getNodeTagsOfOsmNode(long nodeOsmId);
+
+    GHPoint3D getPointOfOsmNode(long nodeOsmId);
   }
 }

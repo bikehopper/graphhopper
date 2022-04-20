@@ -44,6 +44,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.LongToIntFunction;
 import java.util.function.Predicate;
@@ -260,7 +261,8 @@ public class WaySegmentParser {
             }
 
             if (nodeType == JUNCTION_NODE) {
-                OSMJunction junction = new OSMJunction(node.getId());
+                OSMJunction junction = new OSMJunction(
+                        new SegmentNode(node.getId(), -1));
                 junctions.put(node.getId(), junction);
             }
 
@@ -378,7 +380,7 @@ public class WaySegmentParser {
             final PointList pointList = new PointList(segment.size(), nodeData.is3D());
             int from = -1;
             int to = -1;
-            List<Long> addToJunctions = new ArrayList<>();
+            Map<Long, Integer> addToJunctions = new HashMap<>();
             for (int i = 0; i < segment.size(); i++) {
                 SegmentNode node = segment.get(i);
                 int id = node.id;
@@ -389,24 +391,29 @@ public class WaySegmentParser {
                     node.id = id;
                 }
 
-                if (i == 0)
+                if (i == 0) {
                     from = nodeData.idToTowerNode(id);
-                else if (i == segment.size() - 1)
+                    if (junctions.containsKey(node.osmNodeId)) {
+                        addToJunctions.put(node.osmNodeId, from);
+                    }
+                } else if (i == segment.size() - 1) {
                     to = nodeData.idToTowerNode(id);
+                    if (junctions.containsKey(node.osmNodeId)) {
+                        addToJunctions.put(node.osmNodeId, to);
+                    }
+                }
                 else if (isTowerNode(id))
                     throw new IllegalStateException("Tower nodes should only appear at the end of segments, way: " + way.getId());
                 nodeData.addCoordinatesToPointList(id, pointList);
 
-                if (junctions.containsKey(node.osmNodeId)) {
-                    addToJunctions.add(node.osmNodeId);
-                }
             }
             if (from < 0 || to < 0)
                 throw new IllegalStateException("The first and last nodes of a segment must be tower nodes, way: " + way.getId());
             EdgeIteratorState edge = edgeHandler.handleEdge(from, to, pointList, way, nodeTags);
-            for (long key : addToJunctions) {
-                OSMJunction junction = junctions.get(key);
-                junction.addSegment(way, edge.getEdge());
+            for (Entry<Long, Integer> e : addToJunctions.entrySet()) {
+                OSMJunction junction = junctions.get(e.getKey());
+                junction.addSegment(way, pointList.clone(false), edge.getEdge(), segment);
+                junction.setJunctionNodeId(e.getValue());
             }
         }
 
