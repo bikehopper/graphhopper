@@ -73,7 +73,8 @@ public class OSMJunctionParser implements JunctionCostParser {
 
         // If a turn is uncontrolled and features a large way, add a cost to encourage
         // the router to find a controlled intersection -- make cost progressively
-        // harsh?
+        // harsh? isTraffickedMotorway needs to care about crossing, not just turning
+        // onto big street
         if (!isControlled && isTraffickedMotorWay(to.way)) {
           storeInTurnCostStorage(graph, from.edgeId, viaNode.id, to.edgeId, 60d * 5);
         }
