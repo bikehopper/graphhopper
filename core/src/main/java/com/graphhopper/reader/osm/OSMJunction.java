@@ -3,25 +3,44 @@ package com.graphhopper.reader.osm;
 import java.util.*;
 
 import com.graphhopper.reader.ReaderWay;
+import com.graphhopper.util.PointList;
 
 public class OSMJunction {
-  private long junctionNodeId;
-  private Map<Integer, ReaderWay> ways;
+  private SegmentNode junctionNode;
+  private List<JunctionPart> parts;
 
-  public OSMJunction(long junctionNodeId) {
-    this.junctionNodeId = junctionNodeId;
-    this.ways = new HashMap<>();
+  public OSMJunction(SegmentNode junctionNode) {
+    this.junctionNode = junctionNode;
+    this.parts = new ArrayList<>();
   }
 
-  public long getJunctionNodeId() {
-    return this.junctionNodeId;
+  public SegmentNode getJunctionNode() {
+    return this.junctionNode;
   }
 
-  public Map<Integer, ReaderWay> getWays() {
-    return this.ways;
+  public List<JunctionPart> getParts() {
+    return this.parts;
   }
 
-  public void addSegment(ReaderWay way, int edgeId) {
-    this.ways.put(edgeId, way);
+  public void addSegment(ReaderWay way, PointList points, int edgeId, List<SegmentNode> segment) {
+    this.parts.add(new JunctionPart(way, points, edgeId, segment));
+  }
+
+  public void setJunctionNodeId(Integer value) {
+    this.junctionNode.id = value;
+  }
+
+  public class JunctionPart {
+    public ReaderWay way;
+    public PointList points;
+    public Integer edgeId;
+    public List<SegmentNode> segment;
+
+    public JunctionPart(ReaderWay way, PointList points, int edgeId, List<SegmentNode> segment) {
+      this.way = way;
+      this.points = points;
+      this.edgeId = edgeId;
+      this.segment = segment;
+    }
   }
 }

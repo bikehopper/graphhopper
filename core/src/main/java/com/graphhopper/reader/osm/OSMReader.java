@@ -383,6 +383,11 @@ public class OSMReader {
             public Map<String, Object> getNodeTagsOfOsmNode(long nodeOsmId) {
                 return nodeData.getTags(nodeOsmId);
             }
+
+            @Override
+            public GHPoint3D getPointOfOsmNode(long osmNodeId) {
+                return nodeData.getCoordinates(nodeData.getId(osmNodeId));
+            }
         };
 
         tagParserManager.handleJunctionTags(junction, map, baseGraph);

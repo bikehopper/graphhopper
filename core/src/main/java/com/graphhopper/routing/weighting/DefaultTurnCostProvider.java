@@ -57,6 +57,9 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
 
     @Override
     public double calcTurnWeight(int edgeFrom, int nodeVia, int edgeTo) {
+        if (nodeVia == 21914) {
+            System.out.println(nodeVia);
+        }
         if (!EdgeIterator.Edge.isValid(edgeFrom) || !EdgeIterator.Edge.isValid(edgeTo)) {
             return 0;
         }
