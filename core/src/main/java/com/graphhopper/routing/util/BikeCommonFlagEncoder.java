@@ -210,9 +210,9 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         highwayMap.put("tertiary", AVOID.getValue());
         highwayMap.put("tertiary_link", AVOID.getValue());
         // Pedestrian ways
+        highwayMap.put("footway", UNCHANGED.getValue());
         highwayMap.put("path", SLIGHT_PREFER.getValue());
-        highwayMap.put("footway", SLIGHT_PREFER.getValue());
-        highwayMap.put("pedestrian", PREFER.getValue());
+        highwayMap.put("pedestrian", VERY_NICE.getValue());
         // Quiet ways
         highwayMap.put("residential", SLIGHT_PREFER.getValue());
         highwayMap.put("service", SLIGHT_PREFER.getValue());
