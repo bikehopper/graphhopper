@@ -224,15 +224,19 @@ public class MultiCriteriaLabelSetting {
     }
 
     private boolean dominates(Label me, Label they) {
+
         if (weight(me) > weight(they))
             return false;
-
+        if (me.currentTime > they.currentTime)
+            return false;
         if (mindTransfers && me.nTransfers > they.nTransfers)
             return false;
         if (me.impossible && !they.impossible)
             return false;
 
         if (weight(me) < weight(they))
+            return true;
+        if (me.currentTime < they.currentTime)
             return true;
         if (mindTransfers && me.nTransfers < they.nTransfers)
             return true;
@@ -267,6 +271,11 @@ public class MultiCriteriaLabelSetting {
             int c = Double.compare(weight(o1), weight(o2));
             if (c != 0)
                 return c;
+
+            c = Long.compare(o1.currentTime, o2.currentTime);
+            if (c != 0)
+                return c;
+
             c = Integer.compare(o1.nTransfers, o2.nTransfers);
             if (c != 0)
                 return c;
