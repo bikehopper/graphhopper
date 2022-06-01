@@ -287,13 +287,18 @@ public class WaySegmentParser {
             if (!wayFilter.test(way))
                 return;
             List<SegmentNode> segment = new ArrayList<>(way.getNodes().size());
-            for (LongCursor node : way.getNodes()) {
+            for (LongCursor node : way.getNodes())
                 segment.add(new SegmentNode(node.value, nodeData.getId(node.value)));
-            }
             wayPreprocessor.preprocessWay(way, osmNodeId -> nodeData.getCoordinates(nodeData.getId(osmNodeId)));
             splitWayAtJunctionsAndEmptySections(segment, way);
         }
 
+        /**
+         * Take a full segment of a way, split it, and handle it.
+         * 
+         * @param fullSegment
+         * @param way
+         */
         private void splitWayAtJunctionsAndEmptySections(List<SegmentNode> fullSegment, ReaderWay way) {
             List<SegmentNode> segment = new ArrayList<>();
             for (SegmentNode node : fullSegment) {
@@ -322,6 +327,13 @@ public class WaySegmentParser {
                 splitLoopSegments(segment, way);
         }
 
+        /**
+         * Split a segment into multiple segments if it is a loop.
+         * Then, split the segments by nodes and handle it.
+         * 
+         * @param segment
+         * @param way
+         */
         private void splitLoopSegments(List<SegmentNode> segment, ReaderWay way) {
             if (segment.size() < 2)
                 throw new IllegalStateException("Segment size must be >= 2, but was: " + segment.size());
@@ -338,6 +350,13 @@ public class WaySegmentParser {
             }
         }
 
+        /**
+         * Split a segment into multiple segments if it contains nodes to split on.
+         * Then, handle the segments.
+         * 
+         * @param parentSegment
+         * @param way
+         */
         private void splitSegmentAtSplitNodes(List<SegmentNode> parentSegment, ReaderWay way) {
             List<SegmentNode> segment = new ArrayList<>();
             for (int i = 0; i < parentSegment.size(); i++) {
@@ -376,6 +395,15 @@ public class WaySegmentParser {
                 handleSegment(segment, way, emptyMap());
         }
 
+        /**
+         * Process each segment by:
+         * - Creating an edge out of the segment's start, end, geometry, and tags
+         * - Adding the edge to junctions for later
+         * 
+         * @param segment
+         * @param way
+         * @param nodeTags
+         */
         void handleSegment(List<SegmentNode> segment, ReaderWay way, Map<String, Object> nodeTags) {
             final PointList pointList = new PointList(segment.size(), nodeData.is3D());
             int from = -1;

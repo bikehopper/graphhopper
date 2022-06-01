@@ -48,6 +48,7 @@ public class Instruction {
     protected String name;
     protected double distance;
     protected long time;
+    protected double weight;
     protected Map<String, Object> extraInfo = new HashMap<>(3);
 
     /**
@@ -116,6 +117,18 @@ public class Instruction {
 
     public Instruction setTime(long time) {
         this.time = time;
+        return this;
+    }
+
+    /**
+     * Weight for traveling along this path.
+     */
+    public double getWeight() {
+        return weight;
+    }
+
+    public Instruction setWeight(double weight) {
+        this.weight = weight;
         return this;
     }
 

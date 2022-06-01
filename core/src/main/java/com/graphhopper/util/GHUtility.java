@@ -683,6 +683,9 @@ public class GHUtility {
      *                         has to be the next edgeId in the direction from start to end.
      */
     public static double calcWeightWithTurnWeight(Weighting weighting, EdgeIteratorState edgeState, boolean reverse, int prevOrNextEdgeId) {
+        if (prevOrNextEdgeId == 2915324 || prevOrNextEdgeId == 2915322) {
+            System.out.println(2915324);
+        }
         final double edgeWeight = weighting.calcEdgeWeight(edgeState, reverse);
         if (!EdgeIterator.Edge.isValid(prevOrNextEdgeId)) {
             return edgeWeight;
