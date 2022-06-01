@@ -31,6 +31,7 @@ public class ViaInstruction extends Instruction {
         this(instr.getName(), instr.getPoints());
         setDistance(instr.getDistance());
         setTime(instr.getTime());
+        setWeight(instr.getWeight());
         this.extraInfo = instr.extraInfo;
     }
 

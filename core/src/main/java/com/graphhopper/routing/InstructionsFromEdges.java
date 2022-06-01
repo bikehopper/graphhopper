@@ -436,6 +436,7 @@ public class InstructionsFromEdges implements Path.EdgeVisitor {
         prevInstruction.setDistance(newDist + prevInstruction.getDistance());
         // todo: why do we not account for turn times here ?
         prevInstruction.setTime(weighting.calcEdgeMillis(edge, false) + prevInstruction.getTime());
+        prevInstruction.setWeight(weighting.calcEdgeWeight(edge, false) + prevInstruction.getWeight());
     }
 
 }

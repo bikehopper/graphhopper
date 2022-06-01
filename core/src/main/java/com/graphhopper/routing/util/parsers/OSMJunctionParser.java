@@ -1,6 +1,7 @@
 package com.graphhopper.routing.util.parsers;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import com.graphhopper.routing.InstructionsHelper;
 public class OSMJunctionParser implements JunctionCostParser {
   private final DecimalEncodedValue turnCostEnc;
   private static final Set<String> restrictedValues = new HashSet<>();
+  private static final Map<String, Double> highwayTurnCosts = new HashMap<>();
 
   public OSMJunctionParser(DecimalEncodedValue turnCostEnc) {
     this.turnCostEnc = turnCostEnc;
@@ -40,6 +42,17 @@ public class OSMJunctionParser implements JunctionCostParser {
     restrictedValues.add("emergency");
     restrictedValues.add("private");
     restrictedValues.add("destination");
+
+    // highwayTurnCosts.put("tertiary", 30 * 1000d);
+    // highwayTurnCosts.put("tertiary_link", 30 * 1000d);
+    highwayTurnCosts.put("secondary", 60 * 1000d);
+    highwayTurnCosts.put("secondary_link", 60 * 1000d);
+    highwayTurnCosts.put("primary", 120 * 1000d);
+    highwayTurnCosts.put("primary_link", 120 * 1000d);
+    highwayTurnCosts.put("trunk", 240 * 1000d);
+    highwayTurnCosts.put("trunk_link", 240 * 1000d);
+    highwayTurnCosts.put("motorway_link", 480 * 1000d);
+    highwayTurnCosts.put("motorway", 480 * 1000d);
   }
 
   @Override
@@ -63,38 +76,58 @@ public class OSMJunctionParser implements JunctionCostParser {
     }
 
     for (JunctionPart from : junction.getParts()) {
-      Integer fromLanes = getWayLanes(from.way);
-
       for (JunctionPart to : junction.getParts()) {
 
         if (from.edgeId == to.edgeId) {
+          // u turn costs are handled elsewhere
           continue;
         }
 
-        // If a turn is uncontrolled and features a large way, add a cost to encourage
-        // the router to find a controlled intersection -- make cost progressively
-        // harsh? isTraffickedMotorway needs to care about crossing, not just turning
-        // onto big street
-        if (!isControlled && isTraffickedMotorWay(to.way)) {
-          storeInTurnCostStorage(graph, from.edgeId, viaNode.id, to.edgeId, 60d * 5);
+        // If a turn is against traffic (e.g. left in right-driving countries), add a
+        // cost
+        int sign = getTurnSign(map, viaNode, from, to);
+        double cost = 0d;
+        if (sign <= Instruction.TURN_LEFT) {
+          // The 'to' and 'from' streets can contribute to turn costs
+          if (!isControlled) {
+            cost = getTurnCost(junction);
+          }
         }
-
-        // If this turn involves crossing the direction of travel, add a cost related to
-        // the number of lanes needed to cross -- or fall back to highway tag
-        GHPoint3D viaPoint = map.getPointOfOsmNode(viaNode.osmNodeId);
-        GHPoint3D fromPoint = getPointNextTo(map, viaPoint, from.points);
-        GHPoint3D toPoint = getPointNextTo(map, viaPoint, to.points);
-        if (fromPoint == null)
-          fromPoint = viaPoint;
-        if (toPoint == null)
-          toPoint = viaPoint;
-        int sign = getSign(map, fromPoint, viaPoint, toPoint);
-
-        if (sign <= Instruction.TURN_LEFT && !Objects.isNull(fromLanes) && fromLanes > 1) {
-          storeInTurnCostStorage(graph, from.edgeId, viaNode.id, to.edgeId, 60d * fromLanes);
+        // If a turn is straight through, and the junction is uncontrolled, add a cost
+        else if (sign >= Instruction.TURN_SLIGHT_LEFT && sign <= Instruction.TURN_SLIGHT_RIGHT) {
+          if (!isControlled) {
+            // The 'to' street and 'from' street don't contribute to costs
+            cost = getTurnCost(junction, from, to);
+          }
         }
+        if (cost != 0)
+          storeInTurnCostStorage(graph, from.edgeId, viaNode.id, to.edgeId, cost);
       }
     }
+  }
+
+  double getTurnCost(OSMJunction junction, JunctionPart... ignoreParts) {
+    List<JunctionPart> ignoreList = Arrays.asList(ignoreParts);
+    double cost = 0;
+    for (JunctionPart part : junction.getParts()) {
+      if (isLargeHighway(part.way) && !ignoreList.contains(part)) {
+        Double thisCost = highwayTurnCosts.get(part.way.getTag("highway"));
+        if (!Objects.isNull(thisCost))
+          cost = Math.max(cost, thisCost);
+      }
+    }
+    return cost;
+  }
+
+  int getTurnSign(ExternalInternalMap map, SegmentNode viaNode, JunctionPart from, JunctionPart to) {
+    GHPoint3D viaPoint = map.getPointOfOsmNode(viaNode.osmNodeId);
+    GHPoint3D fromPoint = getPointNextTo(map, viaPoint, from.points);
+    GHPoint3D toPoint = getPointNextTo(map, viaPoint, to.points);
+    if (fromPoint == null)
+      fromPoint = viaPoint;
+    if (toPoint == null)
+      toPoint = viaPoint;
+    return getSign(map, fromPoint, viaPoint, toPoint);
   }
 
   // Retrieve the nearest point to a junction node
@@ -120,27 +153,15 @@ public class OSMJunctionParser implements JunctionCostParser {
     return InstructionsHelper.calculateSign(viaPoint.lat, viaPoint.lon, toPoint.lat, toPoint.lon, prevOrientation);
   }
 
-  boolean isTraffickedMotorWay(ReaderWay way) {
+  boolean isLargeHighway(ReaderWay way) {
     return way.hasTag("highway",
-        "motorway", "motorway_link",
-        "trunk", "trunk_link",
-        "primary", "primary_link",
-        "secondary", "secondary_link",
-        "tertiary", "tertiary_link")
+        highwayTurnCosts.keySet())
         && !way.hasTag("motor_vehicle", restrictedValues);
   }
 
   boolean isControlled(ExternalInternalMap map, long nodeId) {
     Map<String, Object> tags = map.getNodeTagsOfOsmNode(nodeId);
     return Arrays.asList("stop", "traffic_signals").contains(tags.get("highway"));
-  }
-
-  Integer getWayLanes(ReaderWay way) {
-    try {
-      return way.hasTag("lanes") ? Integer.parseInt(way.getTag("lanes")) : null;
-    } catch (NumberFormatException e) {
-      return null;
-    }
   }
 
   void storeInTurnCostStorage(Graph graph, int fromEdge, int viaNode, int toEdge, double cost) {
