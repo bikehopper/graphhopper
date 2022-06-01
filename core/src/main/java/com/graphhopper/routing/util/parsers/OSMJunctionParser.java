@@ -70,10 +70,6 @@ public class OSMJunctionParser implements JunctionCostParser {
   public void handleJunctionTags(OSMJunction junction, ExternalInternalMap map, Graph graph) {
     SegmentNode viaNode = junction.getJunctionNode();
     boolean isControlled = isControlled(map, viaNode.osmNodeId);
-    if (viaNode.osmNodeId == 53111744 || viaNode.id == 16095) { // Manila: 53111744 / 21914; Lawton-College: 53080702 /
-                                                                // 16095
-      System.out.println(viaNode);
-    }
 
     for (JunctionPart from : junction.getParts()) {
       for (JunctionPart to : junction.getParts()) {
@@ -168,9 +164,6 @@ public class OSMJunctionParser implements JunctionCostParser {
     TurnCostStorage turnCostStorage = graph.getTurnCostStorage();
 
     cost = Math.min(cost, turnCostEnc.getMaxDecimal());
-    if (viaNode < 0) {
-      System.out.println("h");
-    }
     turnCostStorage.set(turnCostEnc, fromEdge, viaNode, toEdge, cost);
   }
 
