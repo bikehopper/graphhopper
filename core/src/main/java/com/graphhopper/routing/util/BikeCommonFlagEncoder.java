@@ -56,6 +56,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
     private final Map<String, Integer> highwaySpeeds = new HashMap<>();
     protected final boolean penaltyTwoDirections = true;
     protected boolean speedTwoDirections;
+    protected boolean useFerries;
     protected final DecimalEncodedValue penaltyEnc;
     // Car speed limit which switches the preference from UNCHANGED to AVOID_IF_POSSIBLE
     private int avoidSpeedLimit;
@@ -68,7 +69,8 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
     // This is the specific bicycle class
     private String classBicycleKey;
 
-    protected BikeCommonFlagEncoder(String name, int speedBits, double speedFactor, int maxTurnCosts, boolean speedTwoDirections) {
+    protected BikeCommonFlagEncoder(String name, int speedBits, double speedFactor, int maxTurnCosts,
+            boolean speedTwoDirections, boolean useFerries) {
         super(name, speedBits, speedFactor, speedTwoDirections, maxTurnCosts);
 
         penaltyEnc = new DecimalEncodedValueImpl(getKey(name, "penalty"), 4, PenaltyCode.getFactor(1),
@@ -421,9 +423,8 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         avgSpeedEnc.setDecimal(false, edgeFlags, ferrySpeed);
         if (avgSpeedEnc.isStoreTwoDirections())
             avgSpeedEnc.setDecimal(true, edgeFlags, ferrySpeed);
-        // Figure out hours, then...
-        accessEnc.setBool(false, edgeFlags, false);
-        accessEnc.setBool(true, edgeFlags, false);
+        accessEnc.setBool(false, edgeFlags, useFerries);
+        accessEnc.setBool(true, edgeFlags, useFerries);
     }
 
     /**
