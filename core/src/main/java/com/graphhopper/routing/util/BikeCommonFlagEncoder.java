@@ -347,12 +347,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
                 avgSpeedEnc.setDecimal(true, edgeFlags, wayTypeSpeed);
             handleAccess(edgeFlags, way);
         } else {
-            double ferrySpeed = ferrySpeedCalc.getSpeed(way);
-            avgSpeedEnc.setDecimal(false, edgeFlags, ferrySpeed);
-            if (avgSpeedEnc.isStoreTwoDirections())
-                avgSpeedEnc.setDecimal(true, edgeFlags, ferrySpeed);
-            accessEnc.setBool(false, edgeFlags, true);
-            accessEnc.setBool(true, edgeFlags, true);
+            handleFerrySpeedAndAccess(edgeFlags, way);
         }
 
         handlePenalty(edgeFlags, way, wayTypeSpeed);
@@ -419,6 +414,16 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
             }
         }
         return speed;
+    }
+
+    void handleFerrySpeedAndAccess(IntsRef edgeFlags, ReaderWay way) {
+        double ferrySpeed = ferrySpeedCalc.getSpeed(way);
+        avgSpeedEnc.setDecimal(false, edgeFlags, ferrySpeed);
+        if (avgSpeedEnc.isStoreTwoDirections())
+            avgSpeedEnc.setDecimal(true, edgeFlags, ferrySpeed);
+        // Figure out hours, then...
+        accessEnc.setBool(false, edgeFlags, false);
+        accessEnc.setBool(true, edgeFlags, false);
     }
 
     /**
