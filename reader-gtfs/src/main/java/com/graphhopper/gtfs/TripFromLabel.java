@@ -128,7 +128,7 @@ class TripFromLabel {
                 pl.add(ptLeg.stops.get(0).geometry.getY(), ptLeg.stops.get(0).geometry.getX(), Double.NaN);
                 pointsList.add(ptLeg.stops.get(0).geometry.getY(), ptLeg.stops.get(0).geometry.getX(), Double.NaN);
                 for (Trip.Stop stop : ptLeg.stops.subList(0, ptLeg.stops.size() - 1)) {
-                    pl.add(stop.geometry.getY(), stop.geometry.getX());
+                    pl.add(stop.geometry.getY(), stop.geometry.getX(), Double.NaN);
                     pointsList.add(stop.geometry.getY(), stop.geometry.getX(), Double.NaN);
                 }
                 final PointList arrivalPointList = new PointList(PointList.CAP_DEFAULT, includeElevation);
