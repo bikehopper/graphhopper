@@ -17,7 +17,10 @@
  */
 package com.graphhopper.routing.util;
 
+import static com.graphhopper.routing.util.EncodingManager.getKey;
+
 import com.graphhopper.reader.ReaderWay;
+import com.graphhopper.routing.ev.*;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.DistancePlaneProjection;
 import com.graphhopper.util.EdgeIteratorState;
@@ -27,19 +30,35 @@ import com.graphhopper.util.PointList;
 
 import static com.graphhopper.util.Helper.keepIn;
 
+import java.util.*;
+
 /**
  * Stores two speed values into an edge to support avoiding too much incline
  *
  * @author Peter Karich
  */
 public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
+    protected IntEncodedValue netElevationGainEncoder;
+    protected IntEncodedValue avgGradeEncoder;
+
 
     public Bike2WeightFlagEncoder() {
         this(new PMap());
+        this.netElevationGainEncoder = new IntEncodedValueImpl(getKey(this, "ele_gain"), 16, 0, false ,true);
+        this.avgGradeEncoder = new IntEncodedValueImpl(getKey(this, "avg_grade"), 16, -200, false, true);
     }
 
     public Bike2WeightFlagEncoder(PMap properties) {
         super(new PMap(properties).putObject("speed_two_directions", true).putObject("name", properties.getString("name", "bike2")));
+        this.netElevationGainEncoder = new IntEncodedValueImpl(getKey(this, "ele_gain"), 16, 0, false, true);
+        this.avgGradeEncoder = new IntEncodedValueImpl(getKey(this, "avg_grade"), 16, -200, false, true);
+    }
+
+    @Override
+    public void createEncodedValues(List<EncodedValue> registerNewEncodedValue) {
+        super.createEncodedValues(registerNewEncodedValue);
+        registerNewEncodedValue.add(this.netElevationGainEncoder);
+        registerNewEncodedValue.add(this.avgGradeEncoder);
     }
 
     @Override
@@ -80,6 +99,13 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
                 decDist2DSum += DistancePlaneProjection.DIST_PLANE.calcDist3D(prevLat, prevLon, prevEle, nextLat, nextLon, nextEle);;
             }
         }
+        netElevationGainEncoder.setInt(false, intsRef, (int) Math.round(incEleSum));
+        netElevationGainEncoder.setInt(true, intsRef, (int) Math.round(decEleSum));
+        double endEle = pl.getEle(pl.size() - 1);
+        double startEle = pl.getEle(0);
+        avgGradeEncoder.setInt(false, intsRef, (int) Math.round((endEle - startEle) * 100/fullDist2D));
+        avgGradeEncoder.setInt(true, intsRef, (int) Math.round((startEle - endEle) * 100/fullDist2D));
+
 
 
         // Calculate slop via tan(asin(height/distance)) but for rather smallish angles where we can assume tan a=a and sin a=a.
@@ -111,5 +137,4 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
         }
         edge.setFlags(intsRef);
     }
-
 }
