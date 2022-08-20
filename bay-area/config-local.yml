@@ -50,7 +50,7 @@ graphhopper:
   profiles:
     - name: bike2
       vehicle: bike2
-      weighting: fastest
+      weighting: hill_penalty
       use_ferries: false
     - name: foot
       vehicle: foot

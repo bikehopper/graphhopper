@@ -51,7 +51,7 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
     public Bike2WeightFlagEncoder(PMap properties) {
         super(new PMap(properties).putObject("speed_two_directions", true).putObject("name", properties.getString("name", "bike2")));
         this.netElevationGainEncoder = new IntEncodedValueImpl(getKey(this, "ele_gain"), 16, 0, false, true);
-        this.avgGradeEncoder = new IntEncodedValueImpl(getKey(this, "avg_grade"), 16, -200, false, true);
+        this.avgGradeEncoder = new IntEncodedValueImpl(getKey(this, "avg_grade"), 16, 0, true, false);
     }
 
     @Override
@@ -67,22 +67,12 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
         if (!pl.is3D())
             throw new IllegalStateException(getName() + " requires elevation data to improve speed calculation based on it. Please enable it in config via e.g. graph.elevation.provider: srtm");
 
-        IntsRef intsRef = edge.getFlags();
-        if (way.hasTag("tunnel", "yes") || way.hasTag("bridge", "yes") || way.hasTag("highway", "steps"))
-            // do not change speed
-            // note: although tunnel can have a difference in elevation it is very unlikely that the elevation data is correct for a tunnel
-            return;
-
         // Decrease the speed for ele increase (incline), and decrease the speed for ele decrease (decline). The speed-decrease
         // has to be bigger (compared to the speed-increase) for the same elevation difference to simulate losing energy and avoiding hills.
         // For the reverse speed this has to be the opposite but again keeping in mind that up+down difference.
         double incEleSum = 0, incDist2DSum = 0, decEleSum = 0, decDist2DSum = 0;
         double fullDist2D = edge.getDistance();
-
-        // for short edges an incline makes no sense and for 0 distances could lead to NaN values for speed, see #432
-        if (fullDist2D < 2)
-            return;
-
+        
         for(int i=1; i < pl.size(); i++) {
             double prevLat = pl.getLat(i-1);
             double prevLon = pl.getLon(i-1);
@@ -99,14 +89,28 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
                 decDist2DSum += DistancePlaneProjection.DIST_PLANE.calcDist3D(prevLat, prevLon, prevEle, nextLat, nextLon, nextEle);;
             }
         }
+      
+
+        IntsRef intsRef = edge.getFlags();
         netElevationGainEncoder.setInt(false, intsRef, (int) Math.round(incEleSum));
         netElevationGainEncoder.setInt(true, intsRef, (int) Math.round(decEleSum));
         double endEle = pl.getEle(pl.size() - 1);
         double startEle = pl.getEle(0);
-        avgGradeEncoder.setInt(false, intsRef, (int) Math.round((endEle - startEle) * 100/fullDist2D));
-        avgGradeEncoder.setInt(true, intsRef, (int) Math.round((startEle - endEle) * 100/fullDist2D));
+        int grade = fullDist2D > 5.0 ? (int) Math.round((endEle - startEle) * 100/fullDist2D) : 0;
+        if (grade > 100) {
+            throw new IllegalStateException(grade + " is > 100%");
+        }
+
+        avgGradeEncoder.setInt(false, intsRef, grade);
+        if (way.hasTag("tunnel", "yes") || way.hasTag("bridge", "yes") || way.hasTag("highway", "steps"))
+            // do not change speed
+            // note: although tunnel can have a difference in elevation it is very unlikely that the elevation data is correct for a tunnel
+            return;
 
 
+        // for short edges an incline makes no sense and for 0 distances could lead to NaN values for speed, see #432
+        if (fullDist2D < 2)
+            return;
 
         // Calculate slop via tan(asin(height/distance)) but for rather smallish angles where we can assume tan a=a and sin a=a.
         // Then calculate a factor which decreases or increases the speed.
