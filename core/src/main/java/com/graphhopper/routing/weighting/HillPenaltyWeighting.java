@@ -49,13 +49,13 @@ public class HillPenaltyWeighting extends FastestWeighting {
        
         int grade = sign *  edgeState.getGrade();
         if (grade >= 5 && grade < 7) {
-            weight *= 1.02;
+            weight += 10000.0;
         } else if (grade >= 7 && grade < 15) {
-            weight *= 1.05;
+            weight += 20000.0;
         } else if (grade >=15 && grade < 30) {
-            weight *= 1.2;
+            weight += 40000.0;
         } else if (grade >= 30) {
-            weight *= 2.0;
+            weight += 60000.0;
         }
         
         return weight;
