@@ -299,6 +299,7 @@ public class OSMReader {
             simplifyAlgo.simplify(pointList);
 
         double distance = distCalc.calcDistance(pointList);
+        int grade = distance > 5.0 ? (int)Math.round((pointList.getEle(pointList.size() - 1) - pointList.getEle(0)) * 100 / distance) : 0;
 
         if (distance < 0.001) {
             // As investigation shows often two paths should have crossed via one identical point
@@ -328,7 +329,7 @@ public class OSMReader {
             return;
 
         String name = way.getTag("way_name", "");
-        EdgeIteratorState edge = baseGraph.edge(fromIndex, toIndex).setDistance(distance).setFlags(edgeFlags).setName(name);
+        EdgeIteratorState edge = baseGraph.edge(fromIndex, toIndex).setDistance(distance).setGrade(grade).setFlags(edgeFlags).setName(name);
 
         // If the entire way is just the first and last point, do not waste space storing an empty way geometry
         if (pointList.size() > 2) {

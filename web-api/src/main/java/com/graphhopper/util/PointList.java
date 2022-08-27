@@ -127,8 +127,6 @@ public class PointList implements Iterable<GHPoint3D>, PointAccess {
         }
     };
 
-    public static final int CAP_DEFAULT = 10;
-
     final static String ERR_MSG = "Tried to access PointList with too big index!";
     protected int size = 0;
     protected boolean is3D;
@@ -139,7 +137,7 @@ public class PointList implements Iterable<GHPoint3D>, PointAccess {
     private LineString cachedLineString;
 
     public PointList() {
-        this(CAP_DEFAULT, false);
+        this(10, false);
     }
 
     public PointList(int cap, boolean is3D) {

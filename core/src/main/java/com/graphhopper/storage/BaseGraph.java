@@ -737,6 +737,12 @@ public class BaseGraph implements Graph, Closeable {
         }
 
         @Override
+        public EdgeIteratorState setGrade(int grade) {
+            store.setGrade(edgePointer, grade);
+            return this;
+        }
+
+        @Override
         public IntsRef getFlags() {
             if (!freshFlags) {
                 store.readFlags(edgePointer, edgeFlags);
@@ -993,6 +999,11 @@ public class BaseGraph implements Graph, Closeable {
         @Override
         public final String toString() {
             return getEdge() + " " + getBaseNode() + "-" + getAdjNode();
+        }
+
+        @Override
+        public int getGrade() {
+            return store.getGrade(edgePointer);
         }
     }
 }

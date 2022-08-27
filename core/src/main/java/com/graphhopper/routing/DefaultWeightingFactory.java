@@ -95,6 +95,8 @@ public class DefaultWeightingFactory implements WeightingFactory {
 
         } else if ("short_fastest".equalsIgnoreCase(weightingStr)) {
             weighting = new ShortFastestWeighting(encoder, hints, turnCostProvider);
+        } else if ("hill_penalty".equalsIgnoreCase(weightingStr)) {
+            weighting = new HillPenaltyWeighting(encoder, hints, turnCostProvider);
         }
 
         if (weighting == null)

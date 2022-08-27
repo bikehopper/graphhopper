@@ -37,6 +37,7 @@ public class VirtualEdgeIteratorState implements EdgeIteratorState {
     private final int adjNode;
     private final int originalEdgeKey;
     private double distance;
+    private int grade;
     private IntsRef edgeFlags;
     private String name;
     // true if edge should be avoided as start/stop
@@ -354,6 +355,17 @@ public class VirtualEdgeIteratorState implements EdgeIteratorState {
 
     public void setReverseEdge(EdgeIteratorState reverseEdge) {
         this.reverseEdge = reverseEdge;
+    }
+
+    @Override
+    public int getGrade() {
+        return this.grade;
+    }
+
+    @Override
+    public EdgeIteratorState setGrade(int grade) {
+        this.grade = grade;
+        return this;
     }
 
 }
