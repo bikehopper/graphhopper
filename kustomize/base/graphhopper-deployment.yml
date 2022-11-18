@@ -29,9 +29,6 @@ spec:
           limits:
             memory: "12Gi"
             cpu: "8000m"
-        envFrom:
-          - secretRef:
-              name: minio-graphhopper-staging
         env:
         - name: JVM_ARGS
           value: -Xms5g -Xmx10g
@@ -106,8 +103,6 @@ spec:
                 memory: "16Gi"
                 cpu: "6000m"
             envFrom:
-            - secretRef:
-                name: minio-graphhopper-staging
             - secretRef:
                 name: api-511
             env:
