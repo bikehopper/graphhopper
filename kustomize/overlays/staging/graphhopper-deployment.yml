@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
       - name: graphhopper-deployment
-        image: ghcr.io/bikehopper/graphhopper:v4.0-beta5
+        image: ghcr.io/bikehopper/graphhopper:v4.0-beta6
         envFrom:
         - secretRef:
             name: minio-creds
