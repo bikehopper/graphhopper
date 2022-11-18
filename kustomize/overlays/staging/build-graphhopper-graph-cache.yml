@@ -10,9 +10,14 @@ spec:
         spec:
           containers:
           - name: graphhopper-graph-cache-builder
-            image: ghcr.io/bikehopper/graphhopper-graph-cache-builder:v4.0-beta1
+            image: ghcr.io/bikehopper/graphhopper-graph-cache-builder:v4.0-beta2
             envFrom:
             - secretRef:
-                name: minio-creds
+              name: minio-creds
             - secretRef:
-                name: api-511
+              name: api-511
+            env:
+            - name: BUCKET_NAME
+              value: graphhopper-staging
+            - name: MINIO_HOST
+              value: https://minio.techlabor.org:9000
