@@ -1,0 +1,5 @@
+resources:
+  - ../../base
+namespace: staging
+patchesStrategicMerge:
+  - build-graphhopper-graph-cache.yml

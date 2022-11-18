@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: graphhopper-graph-cache-builder
+spec:
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          containers:
+          - name: graphhopper-graph-cache-builder
+            image: ghcr.io/bikehopper/graphhopper-graph-cache-builder:latest
+            envFrom:
+            - secretRef:
+                name: minio-creds
+            - secretRef:
+                name: api-511
