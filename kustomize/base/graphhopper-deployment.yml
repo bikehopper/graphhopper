@@ -2,11 +2,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: graphhopper-deployment
+  name: graphhopper
   labels:
     app: graphhopper
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: graphhopper
@@ -88,7 +88,6 @@ spec:
         spec:
           containers:
           - name: graphhopper-graph-cache-builder
-            image: ghcr.io/bikehopper/graphhopper-graph-cache-builder@sha256:2d4362f145770cfb36af5c457621facdde98606ab9f5d8b845b2a43c8e858ee6
             resources:
               requests:
                 memory: "16Gi"

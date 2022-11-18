@@ -2,13 +2,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: graphhopper-deployment
+  name: graphhopper
 spec:
   replicas: 1
   template:
     spec:
       containers:
-      - name: graphhopper-deployment
+      - name: graphhopper
         image: ghcr.io/bikehopper/graphhopper:v4.0-beta7
         envFrom:
         - secretRef:
