@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graphhopper-deployment
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: graphhopper-deployment
+        image: ghcr.io/bikehopper/graphhopper:v4.0-beta1
+        envFrom:
+        - secretRef:
+            name: minio-creds
+        env:
+        - name: BUCKET_NAME
+          value: graphhopper-staging
+        - name: MINIO_HOST
+          value: http://minio.techlabor.org:9000
