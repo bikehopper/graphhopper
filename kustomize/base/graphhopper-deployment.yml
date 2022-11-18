@@ -17,7 +17,6 @@ spec:
     spec:
       containers:
       - name: graphhopper
-        image: ghcr.io/bikehopper/graphhopper@sha256:3efedca2b2ed38468d3f994bf8865bc22892198f3ce31e2c186a9102f8db1e55
         ports:
           - containerPort: 8989
           - name: health-port
@@ -40,14 +39,6 @@ spec:
           value: /transit/datafeeds?api_key=02a6fde6-e10a-49ce-a96e-5ad9404f137f&operator_id=RG
         - name: API_511_FILE_NAME
           value: current-GTFSTransitData_RG.zip
-        - name: BUCKET_NAME
-          value: bikehopper-graphhopper
-        - name: MINIO_HOST
-          value: minio
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
         readinessProbe:
           httpGet:
             path: /health
@@ -114,14 +105,6 @@ spec:
               value: /transit/datafeeds?operator_id=RG
             - name: API_511_FILE_NAME
               value: current-GTFSTransitData_RG.zip
-            - name: BUCKET_NAME
-              value: bikehopper-graphhopper
-            - name: MINIO_HOST
-              value: minio
-            - name: POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
           imagePullSecrets:
           - name: dockerconfigjson-github-com
           restartPolicy: Never
