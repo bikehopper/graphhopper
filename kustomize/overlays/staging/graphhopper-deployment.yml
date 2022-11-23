@@ -31,7 +31,7 @@ spec:
         spec:
           containers:
           - name: graphhopper-graph-cache-builder
-            image: ghcr.io/bikehopper/graphhopper-graph-cache-builder:v4.0-beta3
+            image: ghcr.io/bikehopper/graphhopper-graph-cache-builder:v4.0-beta7
             envFrom:
             - secretRef:
                 name: minio-creds
