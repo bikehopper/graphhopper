@@ -39,6 +39,8 @@ spec:
           value: /transit/datafeeds?api_key=02a6fde6-e10a-49ce-a96e-5ad9404f137f&operator_id=RG
         - name: API_511_FILE_NAME
           value: current-GTFSTransitData_RG.zip
+        - name: MINIO_HOST
+          value: http://minio.techlabor.org:9000
         readinessProbe:
           httpGet:
             path: /health
@@ -77,7 +79,6 @@ kind: CronJob
 metadata:
   name: graphhopper-graph-cache-builder
 spec:
-  schedule: "0 8,20 * * *"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   concurrencyPolicy: Replace
@@ -104,6 +105,8 @@ spec:
               value: /transit/datafeeds?operator_id=RG
             - name: API_511_FILE_NAME
               value: current-GTFSTransitData_RG.zip
+            - name: MINIO_HOST
+              value: http://minio.techlabor.org:9000
           imagePullSecrets:
           - name: dockerconfigjson-github-com
           restartPolicy: Never

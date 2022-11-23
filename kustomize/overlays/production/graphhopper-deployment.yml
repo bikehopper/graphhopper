@@ -16,14 +16,13 @@ spec:
         env:
         - name: BUCKET_NAME
           value: graphhopper-staging
-
 ---
 apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: graphhopper-graph-cache-builder
 spec:
-  schedule: "0 8,20 * * *"
+  schedule: "0 14,2 * * *"
   jobTemplate:
     spec:
       backoffLimit: 1

@@ -2,4 +2,4 @@ resources:
   - ../../base
 namespace: production
 patchesStrategicMerge:
-  - deployment.yml
+  - graphhopper-deployment.yml
