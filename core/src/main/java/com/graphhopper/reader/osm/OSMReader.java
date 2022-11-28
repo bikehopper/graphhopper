@@ -364,6 +364,12 @@ public class OSMReader {
         return edge;
     }
 
+    /**
+     * 
+     * @param junction
+     * @param nodeData
+     * @param getIdForOSMNodeId
+     */
     private void handleJunction(OSMJunction junction, OSMNodeData nodeData, LongToIntFunction getIdForOSMNodeId) {
         if (turnCostStorage == null)
             return;

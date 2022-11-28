@@ -66,6 +66,9 @@ public class OSMJunctionParser implements JunctionCostParser {
 
   }
 
+  /**
+   * Look at an OSMJunction's tags and store cost information in the graph.
+   */
   @Override
   public void handleJunctionTags(OSMJunction junction, ExternalInternalMap map, Graph graph) {
     SegmentNode viaNode = junction.getJunctionNode();
