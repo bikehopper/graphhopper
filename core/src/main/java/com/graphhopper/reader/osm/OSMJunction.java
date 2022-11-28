@@ -5,6 +5,17 @@ import java.util.*;
 import com.graphhopper.reader.ReaderWay;
 import com.graphhopper.util.PointList;
 
+/**
+ * A class to temporarily remember a "junction" for later in the caching stage
+ * 
+ * A junction is:
+ * - the central SegmentNode (i.e. the OSM node ID and pre-cache graph node ID)
+ * - a list of n JunctionParts, each is:
+ * - - the ReaderWay
+ * - - the PointList for the way
+ * - - the edge id for this segment of the way
+ * - - the list of SegmentNodes for this segment of the way
+ */
 public class OSMJunction {
   private SegmentNode junctionNode;
   private List<JunctionPart> parts;
