@@ -957,6 +957,15 @@ public class GHUtility {
             throw new UnsupportedOperationException("Not supported. Edge is empty.");
         }
 
+        @Override
+        public int getGrade() {
+            throw new UnsupportedOperationException("Not supported. Edge is empty.");
+        }
+
+        @Override
+        public EdgeIteratorState setGrade(int grade) {
+            throw new UnsupportedOperationException("Not supported. Edge is empty.");
+        }
     }
 
     public static BBox createBBox(EdgeIteratorState edgeState) {
