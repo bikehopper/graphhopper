@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import static com.graphhopper.routing.util.PenaltyCode.*;
 
 class GradeBoundary implements Comparable<GradeBoundary> {
     final Integer lowerBoundary;
@@ -71,7 +72,9 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
         super(new PMap(properties).putObject("speed_two_directions", true).putObject("name",
                 properties.getString("name", "bike2")));
 
-        // Define grade boundaries. Order matters.
+        // Define grade boundaries. Order for `grades.add` matters.
+        GradeBoundary extremeDownGrade = new GradeBoundary(-100, -16);
+        grades.add(extremeDownGrade);
         GradeBoundary strongDownGrade = new GradeBoundary(-15, -12);
         grades.add(strongDownGrade);
         GradeBoundary mediumDownGrade = new GradeBoundary(-11, -8);
@@ -86,17 +89,47 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
         grades.add(mediumUpGrade);
         GradeBoundary strongUpGrade = new GradeBoundary(12, 15);
         grades.add(strongUpGrade);
+        GradeBoundary extremeUpGrade = new GradeBoundary(16, 100);
+        grades.add(extremeUpGrade);
 
         // At downwards grades, the penalty is lessened
+        gradePenaltyMap.put(strongDownGrade, (p) -> {
+            // TODO
+            return p;
+        });
+        gradePenaltyMap.put(mediumDownGrade, (p) -> {
+            // TODO
+            return p;
+        });
+        gradePenaltyMap.put(mildDownGrade, (p) -> {
+            // TODO
+            return p;
+        });
 
         // At a neutral grade, the penalty is unchanged
-        Map<PenaltyCode, PenaltyCode> neutralMap = new HashMap<>();
-        for (PenaltyCode code : PenaltyCode.values()) {
-            neutralMap.put(code, code);
-        }
-        gradePenaltyMap.put(neutralGrade, (x) -> x);
+        gradePenaltyMap.put(neutralGrade, (p) -> p);
 
         // At upwards grades, the penalty is increased
+        gradePenaltyMap.put(mildUpGrade, (p) -> {
+            // TODO
+            return p;
+        });
+        gradePenaltyMap.put(mediumUpGrade, (p) -> {
+            // TODO
+            return p;
+        });
+        gradePenaltyMap.put(strongUpGrade, (p) -> {
+            // TODO
+            return p;
+        });
+
+        // At extreme grades, the penalty is vastly increased
+        gradePenaltyMap.put(extremeDownGrade, (p) -> {
+            return REACH_DESTINATION.getValue();
+        });
+        gradePenaltyMap.put(extremeUpGrade, (p) -> {
+            return REACH_DESTINATION.getValue();
+        });
     }
 
     @Override
