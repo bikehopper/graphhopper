@@ -513,9 +513,11 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
             if (way.hasTag("bicycle", "designated") || way.hasTag("bicycle", "official"))
                 pushingSectionPenalty = VERY_NICE.getValue();
             if (way.hasTag("foot", "yes")) {
-                pushingSectionPenalty = Math.max(pushingSectionPenalty + 1, BAD.getValue());
+                pushingSectionPenalty = Math.max(PenaltyCode.from(pushingSectionPenalty).tickUp().getValue(),
+                        BAD.getValue());
                 if (way.hasTag("segregated", "yes"))
-                    pushingSectionPenalty = Math.min(pushingSectionPenalty - 1, BEST.getValue());
+                    pushingSectionPenalty = Math.min(PenaltyCode.from(pushingSectionPenalty).tickDown().getValue(),
+                            BEST.getValue());
             }
             penaltyMap.put(HIGHWAY_KEY, pushingSectionPenalty);
         }

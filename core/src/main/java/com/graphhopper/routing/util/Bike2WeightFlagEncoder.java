@@ -95,14 +95,17 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
         // At downwards grades, the penalty is lessened
         gradePenaltyMap.put(strongDownGrade, (p) -> {
             // TODO
+            PenaltyCode.from(p).tickDown().tickDown().tickDown();
             return p;
         });
         gradePenaltyMap.put(mediumDownGrade, (p) -> {
             // TODO
+            PenaltyCode.from(p).tickDown().tickDown();
             return p;
         });
         gradePenaltyMap.put(mildDownGrade, (p) -> {
             // TODO
+            PenaltyCode.from(p).tickDown();
             return p;
         });
 
@@ -112,14 +115,17 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
         // At upwards grades, the penalty is increased
         gradePenaltyMap.put(mildUpGrade, (p) -> {
             // TODO
+            PenaltyCode.from(p).tickUp();
             return p;
         });
         gradePenaltyMap.put(mediumUpGrade, (p) -> {
             // TODO
+            PenaltyCode.from(p).tickUp().tickUp();
             return p;
         });
         gradePenaltyMap.put(strongUpGrade, (p) -> {
             // TODO
+            PenaltyCode.from(p).tickUp().tickUp().tickUp();
             return p;
         });
 
