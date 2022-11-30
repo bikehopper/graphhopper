@@ -433,6 +433,11 @@ public class InstructionsFromEdges implements Path.EdgeVisitor {
             prevInstruction.getPoints().add(pl, i);
         }
         double newDist = edge.getDistance();
+        int grade = edge.getGrade();
+        if (Math.abs(grade) > Math.abs(prevInstruction.getGrade())) {
+            prevInstruction.setGrade(grade);
+        }
+
         prevInstruction.setDistance(newDist + prevInstruction.getDistance());
         // todo: why do we not account for turn times here ?
         prevInstruction.setTime(weighting.calcEdgeMillis(edge, false) + prevInstruction.getTime());

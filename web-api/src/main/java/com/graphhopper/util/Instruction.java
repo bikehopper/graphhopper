@@ -47,6 +47,7 @@ public class Instruction {
     protected int sign;
     protected String name;
     protected double distance;
+    protected double grade;
     protected long time;
     protected Map<String, Object> extraInfo = new HashMap<>(3);
 
@@ -104,6 +105,18 @@ public class Instruction {
 
     public Instruction setDistance(double distance) {
         this.distance = distance;
+        return this;
+    }
+
+    /**
+     * Grade in percent over the instruction
+     */
+    public double getGrade() {
+        return grade;
+    }
+
+    public Instruction setGrade(int grade) {
+        this.grade = grade;
         return this;
     }
 
