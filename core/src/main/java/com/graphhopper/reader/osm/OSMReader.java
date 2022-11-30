@@ -298,11 +298,13 @@ public class OSMReader {
         if (config.getMaxWayPointDistance() > 0 && pointList.size() > 2)
             simplifyAlgo.simplify(pointList);
 
-        double distance = distCalc.calcDistance(pointList);
-        int grade = distance > 5.0
-                ? (int) Math.round((pointList.getEle(pointList.size() - 1) - pointList.getEle(0)) * 100 / distance)
-                : 0;
+        // use 2d distance for elevation: rise over run
+        double distance2D = distCalc.calcDistance2D(pointList);
+        int grade = distance2D > 5.0
+        ? (int) Math.round((pointList.getEle(pointList.size() - 1) - pointList.getEle(0)) * 100 / distance2D)
+        : 0;
 
+        double distance = distCalc.calcDistance(pointList);
         if (distance < 0.001) {
             // As investigation shows often two paths should have crossed via one identical point
             // but end up in two very close points.
