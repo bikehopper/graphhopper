@@ -18,8 +18,6 @@
 package com.graphhopper.routing.util;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Collectors;
 
 /**
  * Used to store a penalty value in the way flags of an edge. Used in
@@ -60,64 +58,24 @@ public enum PenaltyCode {
         return getFactor(value);
     }
 
-    public PenaltyCode tickUp() {
-        switch (this) {
-            case BEST:
-                return PREFER;
-            case PREFER:
-                return SLIGHT_PREFER;
-            case SLIGHT_PREFER:
-                return UNCHANGED;
-            case UNCHANGED:
-                return SLIGHT_AVOID;
-            case SLIGHT_AVOID:
-                return AVOID;
-            case AVOID:
-                return AVOID_MORE;
-            case AVOID_MORE:
-                return BAD;
-            case BAD:
-                return VERY_BAD;
-            case VERY_BAD:
-                return REACH_DESTINATION;
-            default:
-                return EXCLUDE;
-        }
+    public PenaltyCode tickUpBy(int n) {
+        PenaltyCode[] codes = PenaltyCode.values();
+        int current = Arrays.asList(codes).indexOf(this);
+        return codes[Math.min(current + n, codes.length - 1)];
     }
 
-    public PenaltyCode tickDown() {
-        switch (this) {
-            case EXCLUDE:
-                return REACH_DESTINATION;
-            case REACH_DESTINATION:
-                return VERY_BAD;
-            case VERY_BAD:
-                return BAD;
-            case BAD:
-                return AVOID_MORE;
-            case AVOID_MORE:
-                return AVOID;
-            case AVOID:
-                return SLIGHT_AVOID;
-            case SLIGHT_AVOID:
-                return UNCHANGED;
-            case UNCHANGED:
-                return SLIGHT_PREFER;
-            case SLIGHT_PREFER:
-                return PREFER;
-            case PREFER:
-                return VERY_NICE;
-            default:
-                return BEST;
-        }
+    public PenaltyCode tickDownBy(int n) {
+        PenaltyCode[] codes = PenaltyCode.values();
+        int current = Arrays.asList(codes).indexOf(this);
+        return codes[Math.max(current - n, 0)];
     }
 
     public static PenaltyCode from(double value) {
-        int i = Collections.binarySearch(
-                Arrays.stream(PenaltyCode.values())
-                        .map(PenaltyCode::getValue)
-                        .collect(Collectors.toList()),
-                value);
-        return PenaltyCode.values()[i];
+        PenaltyCode[] codes = PenaltyCode.values();
+        for (PenaltyCode c : codes) {
+            if (c.getValue() >= value)
+                return c;
+        }
+        return codes[codes.length - 1];
     }
 }

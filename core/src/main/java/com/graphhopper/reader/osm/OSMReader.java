@@ -300,9 +300,12 @@ public class OSMReader {
 
         // use 2d distance for elevation: rise over run
         double distance2D = distCalc.calcDistance2D(pointList);
-        int grade = distance2D > 5.0
+        int grade = distance2D > 10.0
         ? (int) Math.round((pointList.getEle(pointList.size() - 1) - pointList.getEle(0)) * 100 / distance2D)
         : 0;
+        // Sometimes SRTM data is wrong
+        if (Math.abs(grade) > 100)
+            grade = 0;
 
         double distance = distCalc.calcDistance(pointList);
         if (distance < 0.001) {
