@@ -571,6 +571,10 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
             }
         }
 
+        // If no motor vehicles are permitted, treat this way like a pedestrian way
+        if (way.hasTag("motor_vehicle", restrictedValues))
+            penaltyMap.put(CYCLE_INFRA_KEY, VERY_NICE.getValue());
+
         String classBicycleValue = way.getTag(classBicycleKey);
         if (classBicycleValue != null) {
             // We assume that humans are better in classifying preferences compared to our
