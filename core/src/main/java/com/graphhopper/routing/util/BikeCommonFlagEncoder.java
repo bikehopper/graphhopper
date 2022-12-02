@@ -27,6 +27,8 @@ import com.graphhopper.util.Helper;
 import java.util.*;
 import java.util.stream.Stream;
 
+import org.apache.xmlgraphics.image.loader.util.Penalty;
+
 import static com.graphhopper.routing.ev.RouteNetwork.*;
 import static com.graphhopper.routing.ev.Cycleway.*;
 import static com.graphhopper.routing.util.EncodingManager.getKey;
@@ -550,11 +552,11 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
                 cyclewayBackwardPenalty = cyclewayMap.get(cyclewayBackward);
 
         if (withTrafficCyclewayTags.contains(cycleway))
-            cyclewayPenalty = highwayPenalty - 1;
+            cyclewayPenalty = PenaltyCode.from(highwayPenalty).tickDownBy(1).getValue();
         if (withTrafficCyclewayTags.contains(cyclewayForward))
-            cyclewayForwardPenalty = highwayPenalty - 1;
+            cyclewayForwardPenalty = PenaltyCode.from(highwayPenalty).tickDownBy(1).getValue();
         if (withTrafficCyclewayTags.contains(cyclewayBackward))
-            cyclewayBackwardPenalty = highwayPenalty - 1;
+            cyclewayBackwardPenalty = PenaltyCode.from(highwayPenalty).tickDownBy(1).getValue();
 
         if (Objects.nonNull(cyclewayPenalty)) {
             penaltyMap.put(CYCLE_INFRA_KEY, cyclewayPenalty);

@@ -116,18 +116,18 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
             return PenaltyCode.from(p).tickUpBy(1).getValue();
         });
         gradePenaltyMap.put(mediumUpGrade, (p) -> {
-            return PenaltyCode.from(p).tickUpBy(2).getValue();
+            return PenaltyCode.from(p).tickUpBy(4).getValue();
         });
         gradePenaltyMap.put(strongUpGrade, (p) -> {
-            return PenaltyCode.from(p).tickUpBy(3).getValue();
+            return Math.max(VERY_BAD.getValue(), p);
         });
 
         // At extreme grades, the penalty is vastly increased
         gradePenaltyMap.put(extremeDownGrade, (p) -> {
-            return REACH_DESTINATION.getValue();
+            return Math.max(REACH_DESTINATION.getValue(), p);
         });
         gradePenaltyMap.put(extremeUpGrade, (p) -> {
-            return REACH_DESTINATION.getValue();
+            return Math.max(REACH_DESTINATION.getValue(), p);
         });
     }
 
@@ -216,6 +216,8 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
 
     @Override
     public void applyWayTags(ReaderWay way, EdgeIteratorState edge) {
+        if (way.getId() == 617276403)
+            System.out.println("here");
         applyWayTagsToPenalty(edge);
         applyWayTagsToSpeed(way, edge);
     }
