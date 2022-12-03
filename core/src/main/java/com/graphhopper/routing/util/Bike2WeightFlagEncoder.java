@@ -216,8 +216,6 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
 
     @Override
     public void applyWayTags(ReaderWay way, EdgeIteratorState edge) {
-        if (way.getId() == 617276403)
-            System.out.println("here");
         applyWayTagsToPenalty(edge);
         applyWayTagsToSpeed(way, edge);
     }

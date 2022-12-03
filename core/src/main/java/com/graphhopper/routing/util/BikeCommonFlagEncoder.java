@@ -27,8 +27,6 @@ import com.graphhopper.util.Helper;
 import java.util.*;
 import java.util.stream.Stream;
 
-import org.apache.xmlgraphics.image.loader.util.Penalty;
-
 import static com.graphhopper.routing.ev.RouteNetwork.*;
 import static com.graphhopper.routing.ev.Cycleway.*;
 import static com.graphhopper.routing.util.EncodingManager.getKey;
