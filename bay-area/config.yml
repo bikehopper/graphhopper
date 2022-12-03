@@ -128,7 +128,7 @@ graphhopper:
 
   # To make CH preparation faster for multiple profiles you can increase the default threads if you have enough RAM.
   # Change this setting only if you know what you are doing and if the default worked for you.
-  prepare.ch.threads: 2
+  prepare.ch.threads: 4
 
   # To tune the performance vs. memory usage for the hybrid mode use
   # prepare.lm.landmarks: 16
