@@ -13,9 +13,9 @@ echo 'Building graph-cache...';
 java -jar *.jar import /graphhopper/bay-area/config.yml;
 echo 'Finished graph-cache.';
 
-# echo 'Building graph-cache tarball...';
-# tar -zvcf "graph-cache.tar.gz" ./graph-cache;
-# echo 'Finished building tarball.';
+echo 'Building graph-cache tarball...';
+tar -zvcf "graph-cache.tar.gz" ./graph-cache;
+echo 'Finished building tarball.';
 
 # echo 'Uploading tarball to MINIO...';
 # AWS_ACCESS_KEY_ID=$ACCESS_KEY AWS_SECRET_ACCESS_KEY=$SECRET_KEY aws s3api put-object --endpoint-url $MINIO_HOST --bucket $BUCKET_NAME --key graphhopper/graph-cache.tar.gz --body graph-cache.tar.gz;
