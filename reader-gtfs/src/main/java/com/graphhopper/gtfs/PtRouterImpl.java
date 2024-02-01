@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparingLong;
 
+
 public final class PtRouterImpl implements PtRouter {
 
     private final GraphHopperConfig config;
@@ -58,7 +59,6 @@ public final class PtRouterImpl implements PtRouter {
     private final RealtimeFeed realtimeFeed;
     private final PathDetailsBuilderFactory pathDetailsBuilderFactory;
     private final WeightingFactory weightingFactory;
-
     @Inject
     public PtRouterImpl(GraphHopperConfig config, TranslationMap translationMap, GraphHopperStorage graphHopperStorage, LocationIndex locationIndex, GtfsStorage gtfsStorage, RealtimeFeed realtimeFeed, PathDetailsBuilderFactory pathDetailsBuilderFactory) {
         this.config = config;
@@ -68,6 +68,7 @@ public final class PtRouterImpl implements PtRouter {
         this.locationIndex = locationIndex;
         this.gtfsStorage = gtfsStorage;
         this.ptGraph = gtfsStorage.getPtGraph();
+
         this.realtimeFeed = realtimeFeed;
         this.pathDetailsBuilderFactory = pathDetailsBuilderFactory;
     }

@@ -22,6 +22,11 @@ mvn clean package -DskipTests
 java -Xmx8g -jar web/target/graphhopper-web-*.jar server reader-gtfs/config-example-pt.yml
 ```
 
+To debug 
+```
+java -Xmx8g -Xdebug -Xrunjdwp:transport=dt_socket,address=1000,server=y,suspend=n -jar web/target/graphhopper-web-6.0-SNAPSHOT.jar server bay-area/config-local.yml
+```
+
 When this is finished you can point your browser to http://localhost:8989
 
 Alternatively, for a more specialized but more minimal demo of transit routing, to http://localhost:8989/maps/pt/
