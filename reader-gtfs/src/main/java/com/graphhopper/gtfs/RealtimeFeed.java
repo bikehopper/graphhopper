@@ -164,6 +164,7 @@ public class RealtimeFeed {
                     });
             gtfsReader.wireUpAdditionalDeparturesAndArrivals(timezone);
         });
+        
 
         return new RealtimeFeed(feedMessages, blockedEdges, delaysForBoardEdges, delaysForAlightEdges, additionalEdges);
     }
@@ -176,8 +177,11 @@ public class RealtimeFeed {
                 .flatMap(e -> StreamSupport.stream(staticGtfs.getPtGraph().backEdgesAround(e.getAdjNode()).spliterator(), false))
                 .flatMap(e -> StreamSupport.stream(staticGtfs.getPtGraph().backEdgesAround(e.getAdjNode()).spliterator(), false))
                 .filter(e -> e.getType() == GtfsStorage.EdgeType.ALIGHT)
-                .filter(e -> normalize(e.getAttrs().tripDescriptor).equals(tripUpdate.getTrip()))
-                .findAny();
+                .filter(e -> e.getAttrs().tripDescriptor.getTripId().equals(tripUpdate.getTrip().getTripId())).findFirst();
+ 
+        if (!firstBoarding.isPresent()) {
+            return null;
+        }
         int n = firstBoarding.get().getAdjNode();
         Stream<PtGraph.PtEdge> boardEdges = evenIndexed(nodes(hopDwellChain(staticGtfs, n)))
                 .mapToObj(e -> alightForBaseNode(staticGtfs, e));
@@ -191,9 +195,16 @@ public class RealtimeFeed {
         Optional<PtGraph.PtEdge> firstBoarding = StreamSupport.stream(staticGtfs.getPtGraph().edgesAround(station).spliterator(), false)
                 .flatMap(e -> StreamSupport.stream(staticGtfs.getPtGraph().edgesAround(e.getAdjNode()).spliterator(), false))
                 .flatMap(e -> StreamSupport.stream(staticGtfs.getPtGraph().edgesAround(e.getAdjNode()).spliterator(), false))
-                .filter(e -> e.getType() == GtfsStorage.EdgeType.BOARD)
-                .filter(e -> normalize(e.getAttrs().tripDescriptor).equals(tripUpdate.getTrip()))
-                .findAny();
+                .filter(e -> {
+                    return e.getType() == GtfsStorage.EdgeType.BOARD;
+                })
+                .filter(e -> {
+                    return e.getAttrs().tripDescriptor.getTripId().equals(tripUpdate.getTrip().getTripId());
+                }).findFirst();
+        if (!firstBoarding.isPresent()) {
+            return null;
+        }
+        
         int n = firstBoarding.get().getAdjNode();
         Stream<PtGraph.PtEdge> boardEdges = evenIndexed(nodes(hopDwellChain(staticGtfs, n)))
                 .mapToObj(e -> boardForAdjNode(staticGtfs, e));
@@ -325,6 +336,7 @@ public class RealtimeFeed {
                 StreamSupport.stream(interpolatedStopTimesForTrip.spliterator(), false).mapToInt(stopTime -> stopTime.stop_sequence).max().orElse(0)
         ) + 1;
         stopTimeUpdateListWithSentinel.add(GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder().setStopSequence(stopSequenceCeiling).setScheduleRelationship(NO_DATA).build());
+        boolean useStaticStopTimes = false;
         for (GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate : stopTimeUpdateListWithSentinel) {
             int nextStopSequence = stopTimes.isEmpty() ? 1 : stopTimes.get(stopTimes.size() - 1).stop_sequence + 1;
             for (int i = nextStopSequence; i < stopTimeUpdate.getStopSequence(); i++) {
@@ -379,14 +391,14 @@ public class RealtimeFeed {
                 stopTime.departure_time = (int) Duration.between(departure_time.truncatedTo(ChronoUnit.DAYS), departure_time).getSeconds();
                 stopTimes.add(stopTime);
                 logger.trace("Number of stop times: {}", stopTimes.size());
-            } else {
-                // http://localhost:3000/route?point=45.51043713898763%2C-122.68381118774415&point=45.522104713562825%2C-122.6455307006836&weighting=fastest&pt.earliest_departure_time=2018-08-24T16%3A56%3A17Z&arrive_by=false&pt.max_walk_distance_per_leg=1000&pt.limit_solutions=5&locale=en-US&vehicle=pt&elevation=false&use_miles=false&points_encoded=false&pt.profile=true
-                // long query:
-                // http://localhost:3000/route?point=45.518526513612244%2C-122.68612861633302&point=45.52908004573869%2C-122.6862144470215&weighting=fastest&pt.earliest_departure_time=2018-08-24T16%3A51%3A20Z&arrive_by=false&pt.max_walk_distance_per_leg=10000&pt.limit_solutions=4&locale=en-US&vehicle=pt&elevation=false&use_miles=false&points_encoded=false&pt.profile=true
-                throw new RuntimeException();
             }
         }
         logger.trace("Number of stop times: {}", stopTimes.size());
+
+        // if (useStaticStopTimes){
+        //     stopTimes.clear();
+        //     feed.getInterpolatedStopTimesForTrip(trip.trip_id).forEach(stopTimes::add);
+        // }
         BitSet validOnDay = new BitSet(); // Not valid on any day. Just a template.
 
         return new GtfsReader.TripWithStopTimes(trip, stopTimes, validOnDay, cancelledArrivals, cancelledDepartures);

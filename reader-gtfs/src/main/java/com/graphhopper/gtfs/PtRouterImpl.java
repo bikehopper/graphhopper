@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparingLong;
 
 
+
 public final class PtRouterImpl implements PtRouter {
 
     private final GraphHopperConfig config;
@@ -59,6 +60,12 @@ public final class PtRouterImpl implements PtRouter {
     private final RealtimeFeed realtimeFeed;
     private final PathDetailsBuilderFactory pathDetailsBuilderFactory;
     private final WeightingFactory weightingFactory;
+
+    private static RealtimeFeedLoadingCache gtfsRtCache;
+    private static List<String> feedUris = Arrays.asList(
+        "http://api.511.org/transit/tripupdates?api_key=097a627b-701f-4afb-b058-f81011eed359&agency=RG"
+    );
+
     @Inject
     public PtRouterImpl(GraphHopperConfig config, TranslationMap translationMap, GraphHopperStorage graphHopperStorage, LocationIndex locationIndex, GtfsStorage gtfsStorage, RealtimeFeed realtimeFeed, PathDetailsBuilderFactory pathDetailsBuilderFactory) {
         this.config = config;
@@ -69,7 +76,12 @@ public final class PtRouterImpl implements PtRouter {
         this.gtfsStorage = gtfsStorage;
         this.ptGraph = gtfsStorage.getPtGraph();
 
-        this.realtimeFeed = realtimeFeed;
+        if (gtfsRtCache == null){
+            gtfsRtCache = new RealtimeFeedLoadingCache(graphHopperStorage, gtfsStorage, feedUris);
+            gtfsRtCache.start();
+        }
+
+        this.realtimeFeed = gtfsRtCache.provide();
         this.pathDetailsBuilderFactory = pathDetailsBuilderFactory;
     }
 

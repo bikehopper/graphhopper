@@ -19,25 +19,21 @@ package com.graphhopper.gtfs;
  */
 
 import com.conveyal.gtfs.GTFSFeed;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
 import com.google.transit.realtime.GtfsRealtime;
 import com.graphhopper.storage.GraphHopperStorage;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class RealtimeFeedLoadingCache{
 
@@ -45,15 +41,23 @@ public class RealtimeFeedLoadingCache{
     private final GraphHopperStorage graphHopperStorage;
     private final GtfsStorage gtfsStorage;
     private final List<URI> feedUris;
-    private ExecutorService executor;
-    private LoadingCache<String, RealtimeFeed> cache;
     private Map<String, Transfers> transfers;
+    private RealtimeFeed latestFeed;
 
-    RealtimeFeedLoadingCache(GraphHopperStorage graphHopperStorage, GtfsStorage gtfsStorage, HttpClient httpClient, List<URI> feedUris) {
+    RealtimeFeedLoadingCache(GraphHopperStorage graphHopperStorage, GtfsStorage gtfsStorage, List<String> feedUris) {
         this.graphHopperStorage = graphHopperStorage;
         this.gtfsStorage = gtfsStorage;
-        this.feedUris = feedUris;
-        this.httpClient = httpClient;
+        this.feedUris = new ArrayList<>();
+        for(String feedUri: feedUris){
+            try {
+                URI uri = new URI(feedUri);
+                this.feedUris.add(uri);
+            } catch (URISyntaxException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        this.httpClient = new DefaultHttpClient();
         this.start();
     }
 
@@ -62,30 +66,20 @@ public class RealtimeFeedLoadingCache{
         for (Map.Entry<String, GTFSFeed> entry : this.gtfsStorage.getGtfsFeeds().entrySet()) {
             this.transfers.put(entry.getKey(), new Transfers(entry.getValue()));
         }
-        this.executor = Executors.newSingleThreadExecutor();
-        this.cache = CacheBuilder.newBuilder()
-                .maximumSize(1)
-                .refreshAfterWrite(30, TimeUnit.SECONDS)
-                .build(new CacheLoader<String, RealtimeFeed>() {
-                    public RealtimeFeed load(String key) {
-                        return fetchFeedsAndCreateGraph();
-                    }
-
-                    @Override
-                    public ListenableFuture<RealtimeFeed> reload(String key, RealtimeFeed oldValue) {
-                        ListenableFutureTask<RealtimeFeed> task = ListenableFutureTask.create(() -> fetchFeedsAndCreateGraph());
-                        executor.execute(task);
-                        return task;
-                    }
-                });
+        this.latestFeed = fetchFeedsAndCreateGraph();
+        new Timer().scheduleAtFixedRate(new TimerTask(){
+            @Override
+            public void run(){
+                latestFeed = fetchFeedsAndCreateGraph();
+            }
+        },0,120000);
     }
 
     public RealtimeFeed provide() {
-        try {
-            return cache.get("pups");
-        } catch (ExecutionException | RuntimeException e) {
-            e.printStackTrace();
+        if(latestFeed == null) {
             return RealtimeFeed.empty();
+        } else {
+            return latestFeed;
         }
     }
 
@@ -94,7 +88,7 @@ public class RealtimeFeedLoadingCache{
         for (URI uri: this.feedUris) {
             try {
                 GtfsRealtime.FeedMessage feedMessage = GtfsRealtime.FeedMessage.parseFrom(httpClient.execute(new HttpGet(uri)).getEntity().getContent());
-                feedMessageMap.put("RG", feedMessage);
+                feedMessageMap.put("gtfs_0", feedMessage);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
