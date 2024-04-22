@@ -911,7 +911,7 @@ function doCustomRequest(request, routeResultsDiv) {
     var points = [];
     for (var idx = 0; idx < ghRequest.route.size(); idx++) {
         var point = ghRequest.route.getIndex(idx);
-        points.push([point.lng, point.lat]);
+        points.push([point.lat, point.lng]);
     }
 
     var reqBody = {
