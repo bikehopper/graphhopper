@@ -109,10 +109,7 @@ public class GHPoint {
         return String.format(Locale.ROOT, "%.8f,%.8f", lat, lon);
     }
 
-    /**
-     * Attention: geoJson is LON,LAT
-     */
     public Double[] toGeoJson() {
-        return new Double[]{lon, lat};
+        return new Double[]{lat, lon};
     }
 }
