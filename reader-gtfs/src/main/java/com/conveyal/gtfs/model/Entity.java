@@ -99,9 +99,11 @@ public abstract class Entity implements Serializable, Cloneable {
          */
         private String getFieldCheckRequired(String column, boolean required) throws IOException {
             String str = reader.get(column);
-            if (str == null && !missingRequiredColumns.contains(column) && required) {
-                feed.errors.add(new MissingColumnError(tableName, column));
-                missingRequiredColumns.add(column);
+            if (str == null) {
+                if (!missingRequiredColumns.contains(column)) {
+                    feed.errors.add(new MissingColumnError(tableName, column));
+                    missingRequiredColumns.add(column);
+                }
             } else if (str.isEmpty()) {
                 if (required) {
                     feed.errors.add(new EmptyFieldError(tableName, row, column));
