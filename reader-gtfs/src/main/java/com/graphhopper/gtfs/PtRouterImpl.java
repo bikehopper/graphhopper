@@ -203,10 +203,8 @@ public final class PtRouterImpl implements PtRouter {
             for (ResponsePath responsePath : responsePaths) {
                 long routeTime = responsePath.getTime();
                 boolean bikeOnly = responsePath.getNumChanges() == -1;
-                if (routeTime > 3 * fastestRouteTime && routeTime > hour && bikeOnly) {
-                } else {
-                    response.add(responsePath);
-                }
+                boolean excludeLongBikeOnly = (routeTime > 3 * fastestRouteTime && routeTime > hour && bikeOnly);
+                if (!excludeLongBikeOnly) response.add(responsePath);
             }
             Comparator<ResponsePath> c = Comparator.comparingInt(p -> (p.isImpossible() ? 1 : 0));
             Comparator<ResponsePath> d = Comparator.comparingDouble(ResponsePath::getTime);
