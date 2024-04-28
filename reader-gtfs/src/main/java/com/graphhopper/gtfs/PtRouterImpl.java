@@ -187,12 +187,27 @@ public final class PtRouterImpl implements PtRouter {
         }
 
         private void parseSolutionsAndAddToResponse(List<List<Label.Transition>> solutions, PointList waypoints) {
+            long fastestRouteTime = Long.MAX_VALUE;
+            List<ResponsePath> responsePaths = new ArrayList<>();
             TripFromLabel tripFromLabel = new TripFromLabel(queryGraph, gtfsStorage, realtimeFeed, pathDetailsBuilderFactory, walkSpeedKmH);
             for (List<Label.Transition> solution : solutions) {
                 final ResponsePath responsePath = tripFromLabel.createResponsePath(translation, waypoints, router, queryGraph, connectingWeighting, solution, requestedPathDetails, connectingProfile.getVehicle(), includeElevation, includeEdges);
                 responsePath.setImpossible(solution.stream().anyMatch(t -> t.label.impossible));
                 responsePath.setRouteWeight(router.weight(solution.get(solution.size() - 1).label));
-                response.add(responsePath);
+                if (responsePath.getTime() < fastestRouteTime)
+                    fastestRouteTime = responsePath.getTime();
+                responsePaths.add(responsePath);
+            }
+
+            long hour = 60 * 60 * 1000;
+            System.out.println("Candidate routes: " + responsePaths.size());
+            for (ResponsePath responsePath : responsePaths) {
+                long routeTime = responsePath.getTime();
+                boolean bikeOnly = responsePath.getNumChanges() == -1;
+                if (routeTime > 3 * fastestRouteTime && routeTime > hour && bikeOnly) {
+                } else {
+                    response.add(responsePath);
+                }
             }
             Comparator<ResponsePath> c = Comparator.comparingInt(p -> (p.isImpossible() ? 1 : 0));
             Comparator<ResponsePath> d = Comparator.comparingDouble(ResponsePath::getTime);
