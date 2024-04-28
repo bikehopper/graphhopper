@@ -200,7 +200,6 @@ public final class PtRouterImpl implements PtRouter {
             }
 
             long hour = 60 * 60 * 1000;
-            System.out.println("Candidate routes: " + responsePaths.size());
             for (ResponsePath responsePath : responsePaths) {
                 long routeTime = responsePath.getTime();
                 boolean bikeOnly = responsePath.getNumChanges() == -1;
