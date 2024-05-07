@@ -37,7 +37,6 @@ public class EdgeListSerializer extends JsonSerializer<EdgeList> {
         for (Edge edge : edges) {
             Map<String, Object> instrJson = new HashMap<>();
             instrList.add(instrJson);
-
             instrJson.put("street_name", edge.getName());
             instrJson.put("time", edge.getTime());
             instrJson.put("distance", Helper.round(edge.getDistance(), 3));
@@ -46,7 +45,7 @@ public class EdgeListSerializer extends JsonSerializer<EdgeList> {
             instrJson.put("penalty", edge.getPenalty());
             instrJson.put("time", edge.getTime());
             instrJson.put("weight", edge.getWeight());
-            
+            instrJson.put("points", edge.getPoints().toString());
         }
         jsonGenerator.writeObject(instrList);
     }

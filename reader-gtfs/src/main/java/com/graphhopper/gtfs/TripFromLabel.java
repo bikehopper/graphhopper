@@ -422,12 +422,14 @@ class TripFromLabel {
                 }
                 EdgeIteratorState edge = graph.getEdgeIteratorState(path.get(i).edge.getId(), path.get(i).label.node.streetNode);
                 instructionsFromEdges.next(edge, i, prevEdgeId);
-                if (includeEdges) {
-                    Edge edgeDetail = new Edge(edge.getName(), edge.getDistance(), edge.getGrade(), edge.isReversed(),
-                            weighting.calcEdgeMillis(edge, false), weighting.calcEdgeWeight(edge, false),
-                            edge.get(penaltyEnc));
-                    edges.add(edgeDetail);
-                }
+                // Edge debugging
+//                if (includeEdges) {
+//                graph.;
+                Edge edgeDetail = new Edge(edge.getName(), edge.getDistance(), edge.getGrade(), edge.isReversed(),
+                        weighting.calcEdgeMillis(edge, false), weighting.calcEdgeWeight(edge, false),
+                        edge.get(penaltyEnc), edge.fetchWayGeometry(FetchMode.ALL));
+                edges.add(edgeDetail);
+//                }
                 prevEdgeId = edge.getEdge();
             }
             instructionsFromEdges.finish();
