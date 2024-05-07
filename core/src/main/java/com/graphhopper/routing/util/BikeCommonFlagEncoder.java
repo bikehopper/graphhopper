@@ -19,16 +19,14 @@ package com.graphhopper.routing.util;
 
 import com.graphhopper.reader.ReaderWay;
 import com.graphhopper.routing.ev.*;
-import com.graphhopper.routing.util.countryrules.CountryRule;
 import com.graphhopper.routing.weighting.PenaltyWeighting;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.Helper;
 
 import java.util.*;
-import java.util.stream.Stream;
 
-import static com.graphhopper.routing.ev.RouteNetwork.*;
 import static com.graphhopper.routing.ev.Cycleway.*;
+import static com.graphhopper.routing.ev.RouteNetwork.*;
 import static com.graphhopper.routing.util.EncodingManager.getKey;
 import static com.graphhopper.routing.util.PenaltyCode.*;
 
@@ -230,7 +228,8 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.MISSING, 1.0d);
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.OTHER, 0.7d);
 
-        setAvoidSpeedLimit(71);
+        // At 45km/h, the likelihood of a fatal crash rises above 1/3rd.
+        setAvoidSpeedLimit(45);
     }
 
     @Override
@@ -634,5 +633,11 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
 
     void setSpecificClassBicycle(String subkey) {
         classBicycleKey = "class:bicycle:" + subkey;
+    }
+
+    public final DecimalEncodedValue getPenaltyEnc() {
+        if (penaltyEnc == null)
+            throw new NullPointerException("FlagEncoder " + getName() + " not yet initialized");
+        return penaltyEnc;
     }
 }
