@@ -635,4 +635,10 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
     void setSpecificClassBicycle(String subkey) {
         classBicycleKey = "class:bicycle:" + subkey;
     }
+
+    public final DecimalEncodedValue getPenaltyEnc() {
+        if (penaltyEnc == null)
+            throw new NullPointerException("FlagEncoder " + getName() + " not yet initialized");
+        return penaltyEnc;
+    }
 }
