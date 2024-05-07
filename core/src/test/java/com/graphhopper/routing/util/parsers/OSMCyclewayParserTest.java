@@ -19,8 +19,6 @@ public class OSMCyclewayParserTest {
 
         ReaderWay marketSt = new ReaderWay(1);
         marketSt.setTag("cycleway:right", "track");
-        marketSt.setTag("highway", "primary");
-        marketSt.setTag("oneway", "yes");
 
         IntsRef edgeFlags = new IntsRef(1);
         IntsRef relationFlags = new IntsRef(1);
