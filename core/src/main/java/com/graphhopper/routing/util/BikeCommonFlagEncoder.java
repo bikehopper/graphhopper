@@ -529,6 +529,11 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
             }
             penaltyMap.put(HIGHWAY_KEY, pushingSectionPenalty);
         }
+
+        if (way.hasTag("motor_vehicle", "no")) {
+            penaltyMap.put(HIGHWAY_KEY, BEST.getValue());
+        }
+
         if (way.hasTag("railway", "tram"))
             penaltyMap.put(HIGHWAY_KEY, AVOID_MORE.getValue());
 
