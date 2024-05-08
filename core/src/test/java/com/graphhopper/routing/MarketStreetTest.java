@@ -1,10 +1,12 @@
 package com.graphhopper.routing;
 
+import com.graphhopper.reader.ReaderRelation;
 import com.graphhopper.reader.ReaderWay;
 import com.graphhopper.routing.ev.DecimalEncodedValue;
 import com.graphhopper.routing.util.BikeFlagEncoder;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.PenaltyCode;
+import com.graphhopper.routing.util.TagParserManager;
 import com.graphhopper.storage.IntsRef;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,18 +14,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MarketStreetTest {
-//    private BikeFlagEncoder bike;// = new BikeFlagEncoder("bike");
-//    private EncodingManager encodingManager;// = new EncodingManager.Builder().add(bike).build();
-//    private IntsRef edgeFlags;
-//    private DecimalEncodedValue penaltyEnc;
-//
-//    @BeforeEach
-//    void setUp() {
-//        bike = new BikeFlagEncoder("bike");
-//        encodingManager = new EncodingManager.Builder().add(bike).build();
-//        edgeFlags = encodingManager.createEdgeFlags();
-//        penaltyEnc = bike.getPenaltyEnc();
-//    }
+    protected BikeFlagEncoder encoder;
+    protected TagParserManager encodingManager;
+
+    @BeforeEach
+    void setUp() {
+        encodingManager = TagParserManager.create(encoder = new BikeFlagEncoder("bike"));
+    }
 
     @Test
     public void testCarFree() {
@@ -89,23 +86,22 @@ public class MarketStreetTest {
                 penaltyEnc.getDecimal(false, edgeFlags));
     }
 
+
     @Test
-    public void test_randomway() {
+    public void test_way204964839() {
         ReaderWay marketSt = new ReaderWay(3);
-        marketSt.setTag("cycleway:right", "track");
+        marketSt.setTag("cycleway:right", "shared_lane");
         marketSt.setTag("highway", "primary");
         marketSt.setTag("maxspeed", "20mph");
-//        marketSt.setTag("");
 
-        BikeFlagEncoder bike = new BikeFlagEncoder("bike");
-        EncodingManager encodingManager = new EncodingManager.Builder().add(bike).build();
-        IntsRef edgeFlags = encodingManager.createEdgeFlags();
-        bike.handleWayTags(edgeFlags, marketSt);
-        DecimalEncodedValue penaltyEnc = bike.getPenaltyEnc();
+        IntsRef relFlags = encodingManager.handleRelationTags(new ReaderRelation(0),
+            encodingManager.createRelationFlags());
+        IntsRef edgeFlags = encodingManager.handleWayTags(marketSt, relFlags);
+        DecimalEncodedValue penaltyEnc = encoder.getPenaltyEnc();
 
-        // "motor_vehicle=no" (no cars allowed on the given way) should clamp
-        // the way's penalty to the best assignable value.
-        assertEquals(PenaltyCode.BEST.getValue(),
+        // Penalty should be high because "shared_lane" is
+        // unsafe cycling infrastructure mixed in with car traffic.
+        assertEquals(PenaltyCode.BAD.getValue(),
                 penaltyEnc.getDecimal(false, edgeFlags));
     }
 }
