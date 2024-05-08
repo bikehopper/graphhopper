@@ -19,14 +19,16 @@ package com.graphhopper.routing.util;
 
 import com.graphhopper.reader.ReaderWay;
 import com.graphhopper.routing.ev.*;
+import com.graphhopper.routing.util.countryrules.CountryRule;
 import com.graphhopper.routing.weighting.PenaltyWeighting;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.Helper;
 
 import java.util.*;
+import java.util.stream.Stream;
 
-import static com.graphhopper.routing.ev.Cycleway.*;
 import static com.graphhopper.routing.ev.RouteNetwork.*;
+import static com.graphhopper.routing.ev.Cycleway.*;
 import static com.graphhopper.routing.util.EncodingManager.getKey;
 import static com.graphhopper.routing.util.PenaltyCode.*;
 
@@ -72,7 +74,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
             boolean speedTwoDirections, boolean useFerries) {
         super(name, speedBits, speedFactor, speedTwoDirections, maxTurnCosts);
 
-        penaltyEnc = new DecimalEncodedValueImpl(getKey(name, "penalty"), 5, PenaltyCode.getFactor(0.5),
+        penaltyEnc = new DecimalEncodedValueImpl(getKey(name, "penalty"), 4, PenaltyCode.getFactor(1),
                 penaltyTwoDirections);
 
         restrictedValues.add("agricultural");
@@ -229,8 +231,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.MISSING, 1.0d);
         setSmoothnessSpeedFactor(com.graphhopper.routing.ev.Smoothness.OTHER, 0.7d);
 
-        // At 45km/h, the likelihood of a fatal crash rises above 1/3rd.
-        setAvoidSpeedLimit(45);
+        setAvoidSpeedLimit(71);
     }
 
     @Override
