@@ -50,8 +50,9 @@ public class CayugaAlemanyTest {
         IntsRef edgeFlags = encodingManager.handleWayTags(alemany, relFlags);
         DecimalEncodedValue penaltyEnc = encoder.getPenaltyEnc();
 
-        // Penalty should be PREFER because of cycleway:right=lane.
-        assertEquals(PenaltyCode.PREFER.getValue(),
+        // The penalty should be elevated because cycleway=lane is cycling
+        // infrastructure that is exposed to car traffic.
+        assertEquals(PenaltyCode.BAD.getValue(),
                 penaltyEnc.getDecimal(false, edgeFlags));
     }
 }
