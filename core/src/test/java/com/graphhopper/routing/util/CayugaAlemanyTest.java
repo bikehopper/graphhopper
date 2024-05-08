@@ -14,10 +14,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CayugaAlemanyTest {
     protected BikeFlagEncoder encoder;
     protected TagParserManager encodingManager;
+    protected DecimalEncodedValue penaltyEnc;
 
     @BeforeEach
     public void setUp() {
         encodingManager = TagParserManager.create(encoder = new BikeFlagEncoder("bike"));
+        penaltyEnc = encodingManager.getDecimalEncodedValue(EncodingManager.getKey(encoder, "penalty"));
     }
 
     @Test
@@ -30,7 +32,6 @@ public class CayugaAlemanyTest {
         IntsRef relFlags = encodingManager.handleRelationTags(new ReaderRelation(0),
                 encodingManager.createRelationFlags());
         IntsRef edgeFlags = encodingManager.handleWayTags(cayuga, relFlags);
-        DecimalEncodedValue penaltyEnc = encoder.getPenaltyEnc();
 
         // Penalty should be SLIGHT_PREFER because of highway=residential.
         assertEquals(PenaltyCode.SLIGHT_PREFER.getValue(),
@@ -48,7 +49,6 @@ public class CayugaAlemanyTest {
         IntsRef relFlags = encodingManager.handleRelationTags(new ReaderRelation(0),
                 encodingManager.createRelationFlags());
         IntsRef edgeFlags = encodingManager.handleWayTags(alemany, relFlags);
-        DecimalEncodedValue penaltyEnc = encoder.getPenaltyEnc();
 
         // The penalty should be elevated because cycleway=lane is cycling
         // infrastructure that is exposed to car traffic.
