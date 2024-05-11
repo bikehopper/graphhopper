@@ -562,8 +562,8 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         }
 
         // If no motor vehicles are permitted, treat this way like a pedestrian way.
-        // We treat this as a cycling infrastructure bonus so that its low
-        // is prioritized above everything else.
+        // We treat this as a cycling infrastructure bonus so that
+        // its low penalty is prioritized above everything else.
         if (way.hasTag("motor_vehicle", restrictedValues))
             penaltyMap.put(CYCLE_INFRA_KEY, BEST.getValue());
 
