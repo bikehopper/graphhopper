@@ -32,7 +32,7 @@ public enum PenaltyCode {
     PREFER(2.0),
     SLIGHT_PREFER(3.0),
     UNCHANGED(5.0),
-    SLIGHT_AVOID(7.5),
+    SLIGHT_AVOID(8.0),
     AVOID(8.0),
     BAD(9.0),
     VERY_BAD(10.0),
