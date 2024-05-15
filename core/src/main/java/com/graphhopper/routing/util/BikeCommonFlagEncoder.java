@@ -511,7 +511,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         }
         penaltyMap.put(HIGHWAY_KEY, highwayPenalty);
         if (way.hasTag("tunnel", intendedValues)) {
-            penaltyMap.put(HIGHWAY_KEY, BAD.getValue());
+            penaltyMap.put(HIGHWAY_KEY, AVOID_MORE.getValue());
         }
         if (pushingSectionsHighways.contains(highway)
                 || "parking_aisle".equals(service)) {
