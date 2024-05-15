@@ -34,6 +34,7 @@ public enum PenaltyCode {
     UNCHANGED(5.0),
     SLIGHT_AVOID(8.0),
     AVOID(8.0),
+    AVOID_MORE(9.0),
     BAD(9.0),
     VERY_BAD(10.0),
     REACH_DESTINATION(12),
