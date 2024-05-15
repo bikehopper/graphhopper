@@ -212,8 +212,8 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         highwayMap.put("trunk_link", REACH_DESTINATION.getValue());
         highwayMap.put("primary", VERY_BAD.getValue());
         highwayMap.put("primary_link", VERY_BAD.getValue());
-        highwayMap.put("secondary", BAD.getValue());
-        highwayMap.put("secondary_link", BAD.getValue());
+        highwayMap.put("secondary", AVOID_MORE.getValue());
+        highwayMap.put("secondary_link", AVOID_MORE.getValue());
         highwayMap.put("tertiary", AVOID.getValue());
         highwayMap.put("tertiary_link", AVOID.getValue());
         // Pedestrian ways
@@ -475,7 +475,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
             case -2:
                 return AVOID;
             case -3:
-                return BAD;
+                return AVOID_MORE;
             default:
                 return UNCHANGED;
         }
@@ -530,7 +530,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
             penaltyMap.put(HIGHWAY_KEY, pushingSectionPenalty);
         }
         if (way.hasTag("railway", "tram"))
-            penaltyMap.put(HIGHWAY_KEY, BAD.getValue());
+            penaltyMap.put(HIGHWAY_KEY, AVOID_MORE.getValue());
 
         // Associate penalty with cycle infrastructure
         if (way.hasTag("bicycle", "designated", "official")) {
