@@ -36,7 +36,7 @@ public enum PenaltyCode {
     AVOID(8.0),
     AVOID_MORE(8.5),
     BAD(9.0),
-    VERY_BAD(9.5),
+    VERY_BAD(10.0),
     REACH_DESTINATION(12),
     EXCLUDE(15);
 
