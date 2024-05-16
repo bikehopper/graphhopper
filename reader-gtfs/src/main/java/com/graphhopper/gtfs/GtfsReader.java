@@ -289,7 +289,7 @@ class GtfsReader {
             int arrivalTimelineNode = arrivalTimeline.computeIfAbsent((stopTime.arrival_time + time) % (24 * 60 * 60), t -> out.createNode());
             departureNode = out.createNode();
             int dayShift = stopTime.departure_time / (24 * 60 * 60);
-            boolean bikesAllowed = !(trip.trip.bikes_allowed == 2);
+            boolean bikesAllowed = (trip.trip.bikes_allowed == 1);
             GtfsStorage.Validity validOn = new GtfsStorage.Validity(getValidOn(trip.validOnDay, dayShift), zoneId, startDate, bikesAllowed);
             out.createEdge(departureTimelineNode, departureNode, new PtEdgeAttributes(GtfsStorage.EdgeType.BOARD, 0, validOn, -1, null, 1, stopTime.stop_sequence, tripDescriptor, null));
             out.createEdge(arrivalNode, arrivalTimelineNode, new PtEdgeAttributes(GtfsStorage.EdgeType.ALIGHT, 0, validOn, -1, null, 0, stopTime.stop_sequence, tripDescriptor, null));
