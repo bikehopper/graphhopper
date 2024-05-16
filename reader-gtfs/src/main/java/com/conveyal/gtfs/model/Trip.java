@@ -84,7 +84,5 @@ public class Trip extends Entity {
             getRefField("service_id", true, feed.services);
             // Route existence confirmed above
         }
-
     }
-
 }
