@@ -203,7 +203,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
 
         // Difficult to use ways
         highwayMap.put("bridleway", REACH_DESTINATION.getValue());
-        highwayMap.put("steps", REACH_DESTINATION.getValue());
+        highwayMap.put("steps", EXCLUDE.getValue());
         highwayMap.put("platform", REACH_DESTINATION.getValue());
         // Busy ways
         highwayMap.put("motorway", REACH_DESTINATION.getValue());
