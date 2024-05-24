@@ -28,17 +28,17 @@ public class SnapPreventionEdgeFilter implements EdgeFilter {
         this.rcEnc = rcEnc;
 
         for (String roadClassOrRoadEnv : snapPreventions) {
-          switch (roadClassOrRoadEnv) {
-            case "motorway":
-              avoidMotorway = true;
-              continue;
-            case "trunk":
-              avoidTrunk = true;
-              continue;
-            case "footway":
-              avoidFootway = true;
-              continue;
-          }
+            switch (roadClassOrRoadEnv) {
+                case "motorway":
+                    avoidMotorway = true;
+                    continue;
+                case "trunk":
+                    avoidTrunk = true;
+                    continue;
+                case "footway":
+                    avoidFootway = true;
+                    continue;
+            }
 
             RoadEnvironment rc = RoadEnvironment.find(roadClassOrRoadEnv);
             if (rc == TUNNEL)
