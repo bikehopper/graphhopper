@@ -4,8 +4,13 @@ import com.carrotsearch.hppc.IntHashSet;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.conveyal.gtfs.GTFSFeed;
 import com.conveyal.gtfs.model.Stop;
+import com.graphhopper.routing.ev.EnumEncodedValue;
+import com.graphhopper.routing.ev.RoadClass;
+import com.graphhopper.routing.ev.RoadEnvironment;
 import com.graphhopper.routing.querygraph.QueryGraph;
 import com.graphhopper.routing.util.EdgeFilter;
+import com.graphhopper.routing.util.EncodingManager;
+import com.graphhopper.routing.util.SnapPreventionEdgeFilter;
 import com.graphhopper.storage.GraphHopperStorage;
 import com.graphhopper.storage.index.LocationIndex;
 import com.graphhopper.storage.index.Snap;
@@ -14,6 +19,7 @@ import com.graphhopper.util.exceptions.PointNotFoundException;
 import com.graphhopper.util.shapes.GHPoint;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,11 +53,19 @@ public class PtLocationSnapper {
         PointList points = new PointList(2, false);
         ArrayList<Snap> pointSnaps = new ArrayList<>();
         ArrayList<Supplier<Label.NodeId>> allSnaps = new ArrayList<>();
+        EncodingManager encodingManager =
+                graphHopperStorage.getEncodingManager();
+        final EnumEncodedValue<RoadClass> roadClassEnc = encodingManager.getEnumEncodedValue(RoadClass.KEY, RoadClass.class);
+        final EnumEncodedValue<RoadEnvironment> roadEnvEnc = encodingManager.getEnumEncodedValue(RoadEnvironment.KEY, RoadEnvironment.class);
         for (int i = 0; i < locations.size(); i++) {
             GHLocation location = locations.get(i);
             if (location instanceof GHPointLocation) {
                 GHPoint point = ((GHPointLocation) location).ghPoint;
-                final Snap closest = locationIndex.findClosest(point.lat, point.lon, snapFilters.get(i));
+                EdgeFilter mergedFilter = new SnapPreventionEdgeFilter(
+                        snapFilters.get(i), roadClassEnc, roadEnvEnc,
+                        Collections.singletonList("footway"));
+                final Snap closest = locationIndex.findClosest(
+                        point.lat, point.lon, mergedFilter);
                 if (!closest.isValid()) {
                     IntHashSet result = new IntHashSet();
                     gtfsStorage.getStopIndex().findEdgeIdsInNeighborhood(point.lat, point.lon, 0, result::add);
