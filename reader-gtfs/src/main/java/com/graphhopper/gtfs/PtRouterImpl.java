@@ -350,6 +350,28 @@ public final class PtRouterImpl implements PtRouter {
             // In turn, we must also think of this virtual walk solution in the other test (where we check if all labels are closed).
         }
 
+        private EdgeFilter makeConnectingSnapFilter(
+                GraphHopperStorage ghStorage, Profile connectingProfile) {
+            EdgeFilter snapFilter = new DefaultSnapFilter(new FastestWeighting(
+                    ghStorage.getEncodingManager()
+                            .getEncoder(connectingProfile.getVehicle())),
+                    ghStorage.getEncodingManager()
+                            .getBooleanEncodedValue(Subnetwork.key(
+                                    connectingProfile.getVehicle())));
+            if (connectingProfile.getHints().has("snap_preventions")) {
+                List<String> snapPreventions = List.of(
+                        connectingProfile.getHints()
+                                .getString("snap_preventions", "").split(","));
+                EncodingManager encodingManager =
+                        graphHopperStorage.getEncodingManager();
+                final EnumEncodedValue<RoadClass> roadClassEnc = encodingManager.getEnumEncodedValue(
+                        RoadClass.KEY, RoadClass.class);
+                final EnumEncodedValue<RoadEnvironment> roadEnvEnc = encodingManager.getEnumEncodedValue(
+                        RoadEnvironment.KEY, RoadEnvironment.class);
+                return new SnapPreventionEdgeFilter(snapFilter, roadClassEnc,
+                        roadEnvEnc, snapPreventions);
+            }
+            return snapFilter;
+        }
     }
-
 }
