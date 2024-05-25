@@ -650,7 +650,7 @@ public class BikeFlagEncoderTest extends AbstractBikeFlagEncoderTester {
     }
 
     @Test
-    public void testFootwaySpeed() {
+    public void testFootway() {
         ReaderWay sidewalk = new ReaderWay(1);
         sidewalk.setTag("highway", "footway");
 
@@ -658,5 +658,7 @@ public class BikeFlagEncoderTest extends AbstractBikeFlagEncoderTester {
         encoder.handleWayTags(edgeFlags, sidewalk);
         assertEquals(PUSHING_SECTION_SPEED,
                 avgSpeedEnc.getDecimal(false, edgeFlags));
+        assertEquals(8.0,
+                penaltyEnc.getDecimal(false, edgeFlags));
     }
 }
