@@ -28,13 +28,19 @@ import com.graphhopper.reader.dem.ElevationProvider;
 import com.graphhopper.reader.dem.GraphElevationSmoothing;
 import com.graphhopper.routing.OSMReaderConfig;
 import com.graphhopper.routing.ev.Country;
+import com.graphhopper.routing.ev.DecimalEncodedValue;
+import com.graphhopper.routing.ev.TurnCost;
+import com.graphhopper.routing.util.AccessFilter;
 import com.graphhopper.routing.util.AreaIndex;
 import com.graphhopper.routing.util.CustomArea;
+import com.graphhopper.routing.util.EncodingManager;
+import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.routing.util.TagParserManager;
 import com.graphhopper.routing.util.countryrules.CountryRule;
 import com.graphhopper.routing.util.countryrules.CountryRuleFactory;
 import com.graphhopper.routing.util.parsers.TurnCostParser;
 import com.graphhopper.storage.BaseGraph;
+import com.graphhopper.storage.Graph;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.storage.NodeAccess;
 import com.graphhopper.storage.TurnCostStorage;
@@ -160,6 +166,10 @@ public class OSMReader {
                 .setWorkerThreads(config.getWorkerThreads())
                 .build();
         waySegmentParser.readOSM(osmFile);
+
+        LOGGER.info("Adding turn costs.");
+        addTurnCosts();
+
         osmDataDate = waySegmentParser.getTimeStamp();
         if (baseGraph.getNodes() == 0)
             throw new RuntimeException("Graph after reading OSM must not be empty");
@@ -167,6 +177,33 @@ public class OSMReader {
                 osmFile.getAbsolutePath(), nf(baseGraph.getNodes()), nf(baseGraph.getEdges()), nf(zeroCounter));
         finishedReading();
     }
+
+    private void addTurnCosts() {
+        EncodingManager em = tagParserManager.getEncodingManager();
+        FlagEncoder encoder = tagParserManager.getEncoder("bike2");
+        DecimalEncodedValue turnCostEnc = em.getDecimalEncodedValue(
+                TurnCost.key(encoder.toString()));
+        EdgeExplorer inExplorer = baseGraph.createEdgeExplorer(
+                AccessFilter.inEdges(encoder.getAccessEnc()));
+        EdgeExplorer outExplorer = baseGraph.createEdgeExplorer(
+                AccessFilter.outEdges(encoder.getAccessEnc()));
+        for (int node = 0; node < baseGraph.getNodes(); ++node) {
+            EdgeIterator inIter = inExplorer.setBaseNode(node);
+            while (inIter.next()) {
+                EdgeIterator outIter = outExplorer.setBaseNode(node);
+                while (outIter.next()) {
+                    // Don't change U-turn's cost.
+                    if (inIter.getEdge() == outIter.getEdge()) {
+                        continue;
+                    }
+                    double TURN_COST = 60.0;
+                    turnCostStorage.set(turnCostEnc, inIter.getEdge(), node,
+                            outIter.getEdge(), TURN_COST);
+                }
+            }
+        }
+    }
+
 
     /**
      * @return the timestamp given in the OSM file header or null if not found
