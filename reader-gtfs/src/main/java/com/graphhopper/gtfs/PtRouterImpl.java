@@ -176,7 +176,8 @@ public final class PtRouterImpl implements PtRouter {
             String connectingProfileName = request.getConnectingProfile() != null ? request.getConnectingProfile() : config.getString("pt.connecting_profile", "foot");
             connectingProfile = config.getProfileByName(connectingProfileName).get();
             connectingWeighting = weightingFactory.createWeighting(connectingProfile, new PMap(), false);
-            connectingSnapFilter = new DefaultSnapFilter(new FastestWeighting(graphHopperStorage.getEncodingManager().getEncoder(connectingProfile.getVehicle())), graphHopperStorage.getEncodingManager().getBooleanEncodedValue(Subnetwork.key(connectingProfile.getVehicle())));
+            connectingSnapFilter = makeConnectingSnapFilter(graphHopperStorage,
+                    connectingProfile);
             includeElevation = request.getEnableElevation();
             includeEdges = request.getIncludeEdges();
         }
