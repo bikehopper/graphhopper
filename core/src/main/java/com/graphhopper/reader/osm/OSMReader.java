@@ -193,12 +193,10 @@ public class OSMReader {
                 EdgeIterator outIter = outExplorer.setBaseNode(node);
                 while (outIter.next()) {
                     // Don't change U-turn's cost.
-                    if (inIter.getEdge() == outIter.getEdge()) {
-                        continue;
-                    }
-                    double TURN_COST = 60.0;
+                    if (inIter.getEdge() == outIter.getEdge()) continue;
+                    double TURN_COST_SEC = 60.0;
                     turnCostStorage.set(turnCostEnc, inIter.getEdge(), node,
-                            outIter.getEdge(), TURN_COST);
+                            outIter.getEdge(), TURN_COST_SEC);
                 }
             }
         }
