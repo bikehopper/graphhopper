@@ -37,8 +37,4 @@ public class CountryRuleFactory {
     public CountryRule getCountryRule(Country country) {
         return rules.get(country);
     }
-    
-    public Map<Country, CountryRule> getCountryToRuleMap() {
-        return rules;
-    }
 }
