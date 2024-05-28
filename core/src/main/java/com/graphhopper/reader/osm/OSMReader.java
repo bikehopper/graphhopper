@@ -202,7 +202,6 @@ public class OSMReader {
         }
     }
 
-
     /**
      * @return the timestamp given in the OSM file header or null if not found
      */
