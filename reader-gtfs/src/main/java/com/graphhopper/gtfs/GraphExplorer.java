@@ -187,9 +187,13 @@ public final class GraphExplorer {
                                         + ", using default weight.");
                             }
                         }
-                        action.accept(new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(),
-                                (long) (connectingWeighting.calcEdgeMillis(e.detach(false), reverse)), weight,
-                                e.getDistance()));
+                        action.accept(
+                                new MultiModalEdge(e.getEdge(), e.getBaseNode(),
+                                        e.getAdjNode(),
+                                        connectingWeighting.calcEdgeMillis(
+                                                e.detach(false), reverse),
+                                        weight,
+                                        e.getDistance()));
                         return true;
                     }
                 }
