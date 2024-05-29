@@ -282,7 +282,7 @@ public final class GraphExplorer {
         Label label = new Label(0, currentTime, null, new Label.NodeId(firstEdge.getBaseNode(), -1), 0, null, 0, 0, 0, false, null);
         for (int i : skippedEdgesForTransfer) {
             EdgeIteratorState e = graph.getEdgeIteratorStateForKey(i);
-            MultiModalEdge multiModalEdge = new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(), (long) (connectingWeighting.calcEdgeMillis(e, reverse)), connectingWeighting.calcEdgeWeight(e.detach(false), reverse), e.getDistance(), e.getGrade());
+            MultiModalEdge multiModalEdge = new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(), (long) (connectingWeighting.calcEdgeMillis(e, reverse)), connectingWeighting.calcEdgeWeight(e.detach(false), reverse), e.getDistance());
             label = new Label(label.edgeWeight + multiModalEdge.weight, label.currentTime + multiModalEdge.time, multiModalEdge, new Label.NodeId(e.getAdjNode(), -1), 0, null, 0, 0, 0, false, label);
         }
         return Label.getTransitions(label, false);
@@ -352,10 +352,6 @@ public final class GraphExplorer {
 
         public double getDistance() {
             return distance;
-        }
-
-        public int getGrade() {
-            return grade;
         }
 
         public int getRouteType() {
