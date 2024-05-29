@@ -309,7 +309,6 @@ public final class GraphExplorer {
             this.time = time;
             this.weight = weight;
             this.distance = distance;
-            this.grade = grade;
         }
 
         public GtfsStorage.EdgeType getType() {
