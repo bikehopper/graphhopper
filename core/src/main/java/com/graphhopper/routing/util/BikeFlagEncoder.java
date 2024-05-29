@@ -55,7 +55,6 @@ public class BikeFlagEncoder extends BikeCommonFlagEncoder {
             boolean useFerries) {
         super(name, speedBits, speedFactor, maxTurnCosts, speedTwoDirections, useFerries);
         addPushingSection("footway");
-        addPushingSection("pedestrian");
         addPushingSection("steps");
         addPushingSection("platform");
 
