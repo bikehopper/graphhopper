@@ -290,7 +290,6 @@ public final class GraphExplorer {
         private long time;
         private double weight;
         private double distance;
-        private int grade;
         private int edge;
         private PtGraph.PtEdge ptEdge;
 
@@ -299,7 +298,7 @@ public final class GraphExplorer {
             this.weight = weight;
         }
 
-        public MultiModalEdge(int edge, int baseNode, int adjNode, long time, double weight, double distance, int grade) {
+        public MultiModalEdge(int edge, int baseNode, int adjNode, long time, double weight, double distance) {
             this.edge = edge;
             this.baseNode = baseNode;
             this.adjNode = adjNode;
