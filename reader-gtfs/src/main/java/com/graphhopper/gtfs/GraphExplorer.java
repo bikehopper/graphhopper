@@ -193,7 +193,7 @@ public final class GraphExplorer {
                                         connectingWeighting.calcEdgeMillis(
                                                 e.detach(false), reverse),
                                         weight,
-                                        e.getDistance()));
+                                        e.getDistance(), e.getGrade()));
                         return true;
                     }
                 }
@@ -282,7 +282,7 @@ public final class GraphExplorer {
         Label label = new Label(0, currentTime, null, new Label.NodeId(firstEdge.getBaseNode(), -1), 0, null, 0, 0, 0, false, null);
         for (int i : skippedEdgesForTransfer) {
             EdgeIteratorState e = graph.getEdgeIteratorStateForKey(i);
-            MultiModalEdge multiModalEdge = new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(), (long) (connectingWeighting.calcEdgeMillis(e, reverse)), connectingWeighting.calcEdgeWeight(e.detach(false), reverse), e.getDistance());
+            MultiModalEdge multiModalEdge = new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(), (long) (connectingWeighting.calcEdgeMillis(e, reverse)), connectingWeighting.calcEdgeWeight(e.detach(false), reverse), e.getDistance(), e.getGrade());
             label = new Label(label.edgeWeight + multiModalEdge.weight, label.currentTime + multiModalEdge.time, multiModalEdge, new Label.NodeId(e.getAdjNode(), -1), 0, null, 0, 0, 0, false, label);
         }
         return Label.getTransitions(label, false);
@@ -294,6 +294,7 @@ public final class GraphExplorer {
         private long time;
         private double weight;
         private double distance;
+        private int grade;
         private int edge;
         private PtGraph.PtEdge ptEdge;
 
@@ -302,13 +303,14 @@ public final class GraphExplorer {
             this.weight = weight;
         }
 
-        public MultiModalEdge(int edge, int baseNode, int adjNode, long time, double weight, double distance) {
+        public MultiModalEdge(int edge, int baseNode, int adjNode, long time, double weight, double distance, int grade) {
             this.edge = edge;
             this.baseNode = baseNode;
             this.adjNode = adjNode;
             this.time = time;
             this.weight = weight;
             this.distance = distance;
+            this.grade = grade;
         }
 
         public GtfsStorage.EdgeType getType() {
