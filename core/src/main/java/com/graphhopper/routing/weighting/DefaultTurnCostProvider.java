@@ -18,9 +18,12 @@
 
 package com.graphhopper.routing.weighting;
 
+import com.graphhopper.routing.ev.BooleanEncodedValue;
 import com.graphhopper.routing.ev.DecimalEncodedValue;
 import com.graphhopper.routing.ev.TurnCost;
 import com.graphhopper.routing.util.FlagEncoder;
+import com.graphhopper.routing.util.TurnCostsConfig;
+import com.graphhopper.storage.Graph;
 import com.graphhopper.storage.TurnCostStorage;
 import com.graphhopper.util.EdgeIterator;
 
@@ -55,11 +58,17 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
         this.turnCostStorage = turnCostStorage;
     }
 
+    public DefaultTurnCostProvider(BooleanEncodedValue turnRestrictionsEnc,
+            TurnCostStorage turnCostStorage, TurnCostsConfig turnCostsConfig) {
+        this.uTurnCosts = turnCostsConfig.getUTurnCosts();
+        this.turnCostStorage = turnCostStorage;
+    }
+
     @Override
     public double calcTurnWeight(int edgeFrom, int nodeVia, int edgeTo) {
-        if (!EdgeIterator.Edge.isValid(edgeFrom) || !EdgeIterator.Edge.isValid(edgeTo)) {
+        if (!EdgeIterator.Edge.isValid(edgeFrom) || !EdgeIterator.Edge.isValid(
+                edgeTo))
             return 0;
-        }
         double tCost = 0;
         if (edgeFrom == edgeTo) {
             // note that the u-turn costs overwrite any turn costs set in TurnCostStorage
@@ -68,6 +77,19 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
             if (turnCostEnc != null)
                 tCost = turnCostStorage.get(turnCostEnc, edgeFrom, nodeVia, edgeTo);
         }
+
+        if (orientationEnc != null) {
+            if (Double.isInfinite(tCost)) return tCost;
+            double changeAngle = calcChangeAngle(inEdge, viaNode, outEdge);
+            if (changeAngle > minRightInRad && changeAngle < minLeftInRad)
+                return straightCost + tCost;
+            else if (changeAngle >= minLeftInRad && changeAngle <= maxLeftInRad)
+                return leftCost + tCost;
+            else if (changeAngle <= minRightInRad && changeAngle >= maxRightInRad)
+                return rightCost + tCost;
+            else return Double.POSITIVE_INFINITY; // too sharp turn
+        }
+
         return tCost;
     }
 
