@@ -116,18 +116,18 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
             return PenaltyCode.from(p).tickUpBy(1).getValue();
         });
         gradePenaltyMap.put(mediumUpGrade, (p) -> {
-            return PenaltyCode.from(p).tickUpBy(4).getValue();
+            return PenaltyCode.from(p).tickUpBy(2).getValue();
         });
         gradePenaltyMap.put(strongUpGrade, (p) -> {
-            return Math.max(VERY_BAD.getValue(), p);
+            return PenaltyCode.from(p).tickUpBy(4).getValue();
         });
 
         // At extreme grades, the penalty is vastly increased
         gradePenaltyMap.put(extremeDownGrade, (p) -> {
-            return Math.max(REACH_DESTINATION.getValue(), p);
+            return Math.max(VERY_BAD.getValue(), p);
         });
         gradePenaltyMap.put(extremeUpGrade, (p) -> {
-            return Math.max(REACH_DESTINATION.getValue(), p);
+            return Math.max(VERY_BAD.getValue(), p);
         });
     }
 
