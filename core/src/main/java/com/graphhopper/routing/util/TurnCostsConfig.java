@@ -1,8 +1,7 @@
 package com.graphhopper.routing.util;
 
 public class TurnCostsConfig {
-    private double leftCost = 45;
-    private double rightCost = 30;
+    private double leftCost = 45, rightCost = 30, straightCost = 0;
     private double minLeftAngle = 25, maxLeftAngle = 180;
     private double minRightAngle = -25, maxRightAngle = -180;
 
