@@ -29,6 +29,7 @@ import com.graphhopper.util.EdgeExplorer;
 import com.graphhopper.util.EdgeIterator;
 import com.graphhopper.util.EdgeIteratorState;
 
+import com.graphhopper.util.GHUtility;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -74,7 +75,8 @@ public final class GraphExplorer {
     Iterable<MultiModalEdge> exploreEdgesAround(Label label) {
         return () -> {
             Iterator<MultiModalEdge> ptEdges = label.node.ptNode != -1 ? ptEdgeStream(label.node.ptNode, label.currentTime).iterator() : Collections.emptyIterator();
-            Iterator<MultiModalEdge> streetEdges = label.node.streetNode != -1 ? streetEdgeStream(label.node.streetNode).iterator() : Collections.emptyIterator();
+            Iterator<MultiModalEdge> streetEdges = label.node.streetNode != -1 ?
+                    streetEdgeStream(label.node.streetNode, label.edge).iterator() : Collections.emptyIterator();
             return Iterators.concat(ptEdges, streetEdges);
         };
     }
@@ -164,17 +166,24 @@ public final class GraphExplorer {
         });
     }
 
-    private Iterable<MultiModalEdge> streetEdgeStream(int streetNode) {
+    private Iterable<MultiModalEdge> streetEdgeStream(int streetNode, MultiModalEdge baseEdge) {
         return () -> Spliterators.iterator(new Spliterators.AbstractSpliterator<MultiModalEdge>(0, 0) {
             final EdgeIterator e = edgeExplorer.setBaseNode(streetNode);
 
             @Override
             public boolean tryAdvance(Consumer<? super MultiModalEdge> action) {
                 while (e.next()) {
-                    if (reverse ? e.getReverse(accessEnc) : e.get(accessEnc)) {
-                        action.accept(new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(), (long) (connectingWeighting.calcEdgeMillis(e.detach(false), reverse)), connectingWeighting.calcEdgeWeight(e.detach(false), reverse), e.getDistance(), e.getGrade()));
-                        return true;
+                    double weight = connectingWeighting.calcEdgeWeight(e.detach(false), reverse);
+                    if (baseEdge != null && baseEdge.getType() == GtfsStorage.EdgeType.HIGHWAY) {
+                        try {
+                            weight = GHUtility.calcWeightWithTurnWeight(connectingWeighting,
+                                    e.detach(false), reverse, baseEdge.edge);
+                        } catch (IllegalArgumentException ex) {
+                            System.out.println("WARN: Could not read flags for node=" + baseEdge.adjNode + ", using default weight.");
+                        }
                     }
+                    action.accept(new MultiModalEdge(e.getEdge(), e.getBaseNode(),
+                            e.getAdjNode(), connectingWeighting.calcEdgeMillis(e.detach(false), reverse), weight, e.getDistance(), e.getGrade()));
                 }
                 return false;
             }
@@ -261,7 +270,8 @@ public final class GraphExplorer {
         Label label = new Label(0, currentTime, null, new Label.NodeId(firstEdge.getBaseNode(), -1), 0, null, 0, 0, 0, false, null);
         for (int i : skippedEdgesForTransfer) {
             EdgeIteratorState e = graph.getEdgeIteratorStateForKey(i);
-            MultiModalEdge multiModalEdge = new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(), (long) (connectingWeighting.calcEdgeMillis(e, reverse)), connectingWeighting.calcEdgeWeight(e.detach(false), reverse), e.getDistance(), e.getGrade());
+            MultiModalEdge multiModalEdge = new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(),
+                    connectingWeighting.calcEdgeMillis(e, reverse), connectingWeighting.calcEdgeWeight(e.detach(false), reverse), e.getDistance(), e.getGrade());
             label = new Label(label.edgeWeight + multiModalEdge.weight, label.currentTime + multiModalEdge.time, multiModalEdge, new Label.NodeId(e.getAdjNode(), -1), 0, null, 0, 0, 0, false, label);
         }
         return Label.getTransitions(label, false);
