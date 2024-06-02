@@ -83,7 +83,6 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
             else
                 return Double.POSITIVE_INFINITY; // too sharp turn
         }
-        System.out.println("edge=" + inEdge + " to edge=" + outEdge + ", turncost=" + tCost);
         return tCost;
     }
 
