@@ -691,7 +691,7 @@ public class GHUtility {
         double turnWeight = reverse
                 ? weighting.calcTurnWeight(origEdgeId, edgeState.getBaseNode(), prevOrNextEdgeId)
                 : weighting.calcTurnWeight(prevOrNextEdgeId, edgeState.getBaseNode(), origEdgeId);
-        return edgeWeight + turnWeight * 1000;
+        return edgeWeight + turnWeight;
     }
 
     /**
