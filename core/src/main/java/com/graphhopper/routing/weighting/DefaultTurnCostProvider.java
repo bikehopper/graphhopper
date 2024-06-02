@@ -69,7 +69,7 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
         if (!EdgeIterator.Edge.isValid(inEdge) || !EdgeIterator.Edge.isValid(
                 outEdge))
             return 0;
-        double tCost =  0;
+        double tCost = 0;
         if (inEdge == outEdge) return uTurnCosts;
 
         if (orientationEnc != null) {
