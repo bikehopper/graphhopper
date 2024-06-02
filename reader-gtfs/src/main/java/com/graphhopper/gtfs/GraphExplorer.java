@@ -20,6 +20,7 @@ package com.graphhopper.gtfs;
 
 import com.google.common.collect.Iterators;
 import com.google.transit.realtime.GtfsRealtime;
+import com.graphhopper.gtfs.GtfsStorage.EdgeType;
 import com.graphhopper.gtfs.PtGraph.PtEdge;
 import com.graphhopper.routing.ev.BooleanEncodedValue;
 import com.graphhopper.routing.util.AccessFilter;
@@ -75,8 +76,7 @@ public final class GraphExplorer {
     Iterable<MultiModalEdge> exploreEdgesAround(Label label) {
         return () -> {
             Iterator<MultiModalEdge> ptEdges = label.node.ptNode != -1 ? ptEdgeStream(label.node.ptNode, label.currentTime).iterator() : Collections.emptyIterator();
-            Iterator<MultiModalEdge> streetEdges = label.node.streetNode != -1 ?
-                    streetEdgeStream(label.node.streetNode, label.edge).iterator() : Collections.emptyIterator();
+            Iterator<MultiModalEdge> streetEdges = label.node.streetNode != -1 ? streetEdgeStream(label.node.streetNode, label.edge).iterator() : Collections.emptyIterator();
             return Iterators.concat(ptEdges, streetEdges);
         };
     }
@@ -173,17 +173,23 @@ public final class GraphExplorer {
             @Override
             public boolean tryAdvance(Consumer<? super MultiModalEdge> action) {
                 while (e.next()) {
-                    double weight = connectingWeighting.calcEdgeWeight(e.detach(false), reverse);
-                    if (baseEdge != null && baseEdge.getType() == GtfsStorage.EdgeType.HIGHWAY) {
-                        try {
-                            weight = GHUtility.calcWeightWithTurnWeight(connectingWeighting,
-                                    e.detach(false), reverse, baseEdge.edge);
-                        } catch (IllegalArgumentException ex) {
-                            System.out.println("WARN: Could not read flags for node=" + baseEdge.adjNode + ", using default weight.");
+                    if (reverse ? e.getReverse(accessEnc) : e.get(accessEnc)) {
+                        double weight = connectingWeighting.calcEdgeWeight(e.detach(false), reverse);
+                        long time = connectingWeighting.calcEdgeMillis(e.detach(false), reverse);
+                        if (baseEdge != null && baseEdge.getType() == EdgeType.HIGHWAY) {
+                            try {
+                                weight = GHUtility.calcWeightWithTurnWeight(connectingWeighting, e.detach(false), reverse, baseEdge.edge);
+                                time = GHUtility.calcMillisWithTurnMillis(connectingWeighting, e.detach(false), reverse, baseEdge.edge);
+                            } catch (IllegalArgumentException ex) {
+                                System.out.println("WARN: Could not read flags for node: " + baseEdge.adjNode + ", using default weight.");
+                            }
                         }
+                        action.accept(new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(),
+                                time,
+                                weight,
+                                e.getDistance(), e.getGrade()));
+                        return true;
                     }
-                    action.accept(new MultiModalEdge(e.getEdge(), e.getBaseNode(),
-                            e.getAdjNode(), connectingWeighting.calcEdgeMillis(e.detach(false), reverse), weight, e.getDistance(), e.getGrade()));
                 }
                 return false;
             }
