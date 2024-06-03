@@ -31,10 +31,16 @@ public class CountryRuleFactory {
     private final Map<Country, CountryRule> rules = new EnumMap<>(Country.class);
     
     public CountryRuleFactory() {
+        rules.put(AUT, new AustriaCountryRule());
+        rules.put(DEU, new GermanyCountryRule());
         rules.put(USA, new UnitedStatesCountryRule());
     }
 
     public CountryRule getCountryRule(Country country) {
         return rules.get(country);
+    }
+    
+    public Map<Country, CountryRule> getCountryToRuleMap() {
+        return rules;
     }
 }
