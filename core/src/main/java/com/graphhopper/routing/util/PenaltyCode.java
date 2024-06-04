@@ -28,15 +28,15 @@ import java.util.Arrays;
 public enum PenaltyCode {
     // Declare in ascending order
     BEST(1.0),
-    VERY_NICE(1.5),
+    VERY_NICE(2.0),
     PREFER(2.0),
-    SLIGHT_PREFER(2.5),
+    SLIGHT_PREFER(3.0),
     UNCHANGED(5.0),
-    SLIGHT_AVOID(7.5),
+    SLIGHT_AVOID(8.0),
     AVOID(8.0),
-    AVOID_MORE(8.5),
+    AVOID_MORE(9.0),
     BAD(9.0),
-    VERY_BAD(9.5),
+    VERY_BAD(10.0),
     REACH_DESTINATION(12),
     EXCLUDE(15);
 
