@@ -440,7 +440,7 @@ public class GraphHopper {
         }
         ghLocation = graphHopperFolder;
 
-        countryRuleFactory = ghConfig.getBool("country_rules.enabled", false) ? new CountryRuleFactory() : null;
+        countryRuleFactory = ghConfig.getBool("country_rules.enabled", true) ? new CountryRuleFactory() : null;
         customAreasDirectory = ghConfig.getString("custom_areas.directory", customAreasDirectory);
 
         defaultSegmentSize = ghConfig.getInt("graph.dataaccess.segment_size", defaultSegmentSize);
