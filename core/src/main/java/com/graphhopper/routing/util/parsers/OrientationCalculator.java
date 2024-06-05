@@ -49,7 +49,6 @@ public class OrientationCalculator implements TagParser {
                     point1Rev.getLat(), point1Rev.getLon(),
                     point2Rev.getLat(), point2Rev.getLon());
             orientationEnc.setDecimal(true, edgeFlags, orientationRevRad);
-//            System.out.println("Initializing orientation for way=" + way.getId());
         }
         return edgeFlags;
     }
