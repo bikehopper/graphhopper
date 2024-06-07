@@ -135,8 +135,9 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
         int grade = edge.getGrade();
         IntsRef edgeFlags = edge.getFlags();
         Double forwardPenalty = penaltyEnc.getDecimal(false, edgeFlags);
-        Double newForwardPenalty = gradePenaltyMap.get(boundaryFor(grade)).apply(forwardPenalty);
-        penaltyEnc.setDecimal(false, edgeFlags, newForwardPenalty);
+        // Grade penalties are temporarily disabled due to bad elevation data.
+        // forwardPenalty = gradePenaltyMap.get(boundaryFor(grade)).apply(forwardPenalty);
+        penaltyEnc.setDecimal(false, edgeFlags, forwardPenalty);
 
         Double backwardPenalty = penaltyEnc.getDecimal(true, edgeFlags);
         Double newBackwardPenalty = gradePenaltyMap.get(boundaryFor(-1 * grade)).apply(backwardPenalty);
