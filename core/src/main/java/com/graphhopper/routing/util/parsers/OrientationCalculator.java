@@ -20,6 +20,10 @@ public class OrientationCalculator implements TagParser {
         this.orientationEnc = Orientation.create();
     }
 
+    public OrientationCalculator(DecimalEncodedValue orientationEnc) {
+        this.orientationEnc = orientationEnc;
+    }
+
     @Override
     public void createEncodedValues(EncodedValueLookup lookup,
             List<EncodedValue> registerNewEncodedValue) {
