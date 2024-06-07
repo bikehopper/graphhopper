@@ -42,17 +42,21 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
         this(encoder, turnCostStorage, Weighting.INFINITE_U_TURN_COSTS);
     }
 
-    public DefaultTurnCostProvider(FlagEncoder encoder, Graph graph, TurnCostsConfig turnCostsConfig) {
+    public DefaultTurnCostProvider(Graph graph, TurnCostsConfig turnCostsConfig) {
         this.graph = graph;
-        String key = Orientation.KEY;
-        this.orientationEnc = encoder.hasEncodedValue(key) ? encoder.getDecimalEncodedValue(key) : null;
-
+//        this.orientationEnc = Orientation.create();
         this.minLeftRad = Math.toRadians(turnCostsConfig.getMinLeftAngle());
         this.minRightRad = Math.toRadians(turnCostsConfig.getMinRightAngle());
         this.maxLeftRad = Math.toRadians(turnCostsConfig.getMaxLeftAngle());
         this.maxRightRad = Math.toRadians(turnCostsConfig.getMaxRightAngle());
         this.leftCost = turnCostsConfig.getLeftCost();
         this.rightCost = turnCostsConfig.getRightCost();
+    }
+
+    public DefaultTurnCostProvider(Graph graph, TurnCostsConfig turnCostsConfig,
+            DecimalEncodedValue orientationEnc) {
+        this(graph, turnCostsConfig);
+        this.orientationEnc = orientationEnc;
     }
 
     public DefaultTurnCostProvider(BooleanEncodedValue turnRestrictionsEnc,
