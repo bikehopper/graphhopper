@@ -66,7 +66,7 @@ public class DefaultWeightingFactory implements WeightingFactory {
         if (profile.isTurnCosts() && !disableTurnCosts) {
             if (!encoder.supportsTurnCosts())
                 throw new IllegalArgumentException("Encoder " + encoder + " does not support turn costs");
-            turnCostProvider = new DefaultTurnCostProvider(encoder, graph, new TurnCostsConfig());
+            turnCostProvider = new DefaultTurnCostProvider(graph, new TurnCostsConfig());
         } else {
             turnCostProvider = NO_TURN_COST_PROVIDER;
         }
