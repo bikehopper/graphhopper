@@ -152,7 +152,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         setSurfaceSpeed("wood", 6);
 
         setHighwaySpeed("living_street", 6);
-        setHighwaySpeed("steps",PUSHING_SECTION_SPEED / 3);
+        setHighwaySpeed("steps",PUSHING_SECTION_SPEED / 4);
         avoidHighwayTags.add("steps");
 
         final int CYCLEWAY_SPEED = 18;  // Make sure cycleway and path use same speed value, see #634
@@ -409,7 +409,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
                 && (way.hasTag("highway", pushingSectionsHighways) || way.hasTag("bicycle", "dismount"))) {
             if (!way.hasTag("bicycle", intendedValues)) {
                 // Here we set the speed for pushing sections and set speed for steps as even lower:
-                speed = way.hasTag("highway", "steps") ? PUSHING_SECTION_SPEED / 3 : PUSHING_SECTION_SPEED;
+                speed = way.hasTag("highway", "steps") ? PUSHING_SECTION_SPEED / 4 : PUSHING_SECTION_SPEED;
             } else if (way.hasTag("bicycle", "designated") || way.hasTag("bicycle", "official") ||
                     way.hasTag("segregated", "yes") || way.hasTag("bicycle", "yes")) {
                 // Here we handle the cases where the OSM tagging results in something similar to "highway=cycleway"

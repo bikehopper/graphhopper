@@ -31,7 +31,7 @@ public class BikeFlagEncoder extends BikeCommonFlagEncoder {
     }
 
     public BikeFlagEncoder(String name) {
-        this(name, 4, 2, 0, false, true);
+        this(name, 5, 1, 0, false, true);
     }
 
     public BikeFlagEncoder(PMap properties) {

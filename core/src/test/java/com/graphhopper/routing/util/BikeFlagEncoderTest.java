@@ -36,7 +36,7 @@ public class BikeFlagEncoderTest extends AbstractBikeFlagEncoderTester {
 
     @Override
     protected BikeCommonFlagEncoder createBikeEncoder() {
-        return new BikeFlagEncoder(new PMap("block_fords=true"));
+        return new BikeFlagEncoder();
     }
 
     @Test
@@ -647,5 +647,16 @@ public class BikeFlagEncoderTest extends AbstractBikeFlagEncoderTester {
         encoder.handleWayTags(edgeFlags, carFreeWay);
         assertEquals(PenaltyCode.BEST.getValue(),
                 penaltyEnc.getDecimal(false, edgeFlags));
+    }
+
+    @Test
+    public void testCorridor() {
+        ReaderWay steps = new ReaderWay(1);
+        steps.setTag("highway", "steps");
+
+        IntsRef edgeFlags = encodingManager.createEdgeFlags();
+        encoder.handleWayTags(edgeFlags, steps);
+        assertEquals(PUSHING_SECTION_SPEED / 4, (int) avgSpeedEnc.getDecimal(false, edgeFlags));
+        assertEquals(PenaltyCode.EXCLUDE.getValue(), penaltyEnc.getDecimal(false, edgeFlags));
     }
 }
