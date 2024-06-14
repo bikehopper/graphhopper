@@ -120,24 +120,24 @@ public abstract class AbstractTiffElevationProvider extends TileBasedElevationPr
             DataAccess heights = getDirectory().create(name + ".gh");
             demProvider.setHeights(heights);
             boolean loadExisting = false;
-//            try {
-//                loadExisting = heights.loadExisting();
-//            } catch (Exception ex) {
-//                logger.warn("cannot load " + name + ", error: " + ex.getMessage());
-//            }
+            try {
+                loadExisting = heights.loadExisting();
+            } catch (Exception ex) {
+                logger.warn("cannot load " + name + ", error: " + ex.getMessage());
+            }
 
             if (!loadExisting) {
                 String zippedURL = getDownloadURL(lat, lon);
                 File file = new File(cacheDir, new File(getFileNameOfLocalFile(lat, lon)).getName());
 
-//                try {
-//                    downloadFile(file, zippedURL);
-//                } catch (IOException e) {
-//                    demProvider.setSeaLevel(true);
-//                    // use small size on disc and in-memory
-//                    heights.create(10).flush();
-//                    return 0;
-//                }
+                try {
+                    downloadFile(file, zippedURL);
+                } catch (IOException e) {
+                    demProvider.setSeaLevel(true);
+                    // use small size on disc and in-memory
+                    heights.create(10).flush();
+                    return 0;
+                }
 
                 // short == 2 bytes
                 heights.create(2 * WIDTH * HEIGHT);
