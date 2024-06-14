@@ -10,24 +10,24 @@ import org.apache.xmlgraphics.image.codec.tiff.TIFFDecodeParam;
 import org.apache.xmlgraphics.image.codec.tiff.TIFFImageDecoder;
 import org.apache.xmlgraphics.image.codec.util.SeekableStream;
 
-public class NedElevationProvider extends AbstractTiffElevationProvider {
+public class USGSProvider extends AbstractTiffElevationProvider {
 
     String filename = "n38w123";
 
-    public NedElevationProvider(String cacheDir) {
+    public USGSProvider(String cacheDir) {
         this("", cacheDir, "", 10812, 10812, 1, 1);
     }
 
-    public NedElevationProvider(String baseUrl, String cacheDir,
+    public USGSProvider(String baseUrl, String cacheDir,
             String downloaderName, int width, int height, int latDegree,
             int lonDegree) {
         super(baseUrl, cacheDir, downloaderName, width, height, latDegree,
                 lonDegree);
-        setInterpolate(true);
+//        setInterpolate(true);
     }
 
     public static void main(String[] args) {
-        NedElevationProvider elevationProvider = new NedElevationProvider("/tmp/");
+        USGSProvider elevationProvider = new USGSProvider("/tmp/");
 
         // Market Street ~-5ft to 260ft in prod.
         System.out.println("Elevation: " + elevationProvider.getEle(37.7903317182555, -122.39999824547087) + "m");
