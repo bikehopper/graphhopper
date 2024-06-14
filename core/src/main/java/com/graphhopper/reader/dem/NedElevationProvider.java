@@ -12,31 +12,29 @@ import org.apache.xmlgraphics.image.codec.util.SeekableStream;
 
 public class NedElevationProvider extends AbstractTiffElevationProvider {
 
+    String filename = "n38w123";
+
+    public NedElevationProvider(String cacheDir) {
+        this("", cacheDir, "", 10812, 10812, 1, 1);
+    }
+
     public NedElevationProvider(String baseUrl, String cacheDir,
             String downloaderName, int width, int height, int latDegree,
             int lonDegree) {
         super(baseUrl, cacheDir, downloaderName, width, height, latDegree,
                 lonDegree);
+        setInterpolate(true);
     }
 
     public static void main(String[] args) {
-        NedElevationProvider elevationProvider = new NedElevationProvider(
-                "", "/tmp/", "", 10812, 10812,
-                1, 1);
+        NedElevationProvider elevationProvider = new NedElevationProvider("/tmp/");
 
-        // Market Street ~-5ft to 260ft.
+        // Market Street ~-5ft to 260ft in prod.
         System.out.println("Elevation: " + elevationProvider.getEle(37.7903317182555, -122.39999824547087) + "m");
         System.out.println("Elevation: " + elevationProvider.getEle(37.79112431722635, -122.39901032204128) + "m");
 
-        // Mount Davidson: expected: 290m+ actual: 77.
-        System.out.println("Elevation: " + elevationProvider.getEle(37.7383486,-122.4544909) + "m");
-
-        // San Bruno Mountain -> actual: 111m
-        System.out.println("Elevation: " + elevationProvider.getEle(37.687365646377906, -122.4354465347176) + "m");
-
-        // Bay --> 0m
-        System.out.println("Elevation: " + elevationProvider.getEle(37.72314991895665, -122.30819708256892) + "m");
-
+        // Mount Davidson, expected: ~283m
+        System.out.println("Elevation: " + elevationProvider.getEle(37.738259, -122.45463) + "m");
     }
 
     @Override
@@ -56,12 +54,12 @@ public class NedElevationProvider extends AbstractTiffElevationProvider {
 
     @Override
     String getFileNameOfLocalFile(double lat, double lon) {
-        return "n38w123.tif";
+        return filename + ".tif";
     }
 
     @Override
     String getFileName(double lat, double lon) {
-        return "n38w123";
+        return filename;
     }
 
     @Override
