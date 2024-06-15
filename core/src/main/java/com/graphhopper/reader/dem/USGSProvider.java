@@ -23,7 +23,6 @@ public class USGSProvider extends AbstractTiffElevationProvider {
             int lonDegree) {
         super(baseUrl, cacheDir, downloaderName, width, height, latDegree,
                 lonDegree);
-//        setInterpolate(true);
     }
 
     public static void main(String[] args) {
