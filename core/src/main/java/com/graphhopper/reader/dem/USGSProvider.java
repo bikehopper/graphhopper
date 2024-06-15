@@ -2,6 +2,7 @@ package com.graphhopper.reader.dem;
 
 import static com.graphhopper.util.Helper.close;
 
+import com.graphhopper.storage.DataAccess;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,6 +65,52 @@ public class USGSProvider extends AbstractTiffElevationProvider {
     @Override
     String getDownloadURL(double lat, double lon) {
         return "";
+    }
+
+    @Override
+    public double getEle(double lat, double lon) {
+        // Return fast, if there is no data available
+        if (isOutsideSupportedArea(lat, lon)) return 0;
+
+        lat = (int) (lat * precision) / precision;
+        lon = (int) (lon * precision) / precision;
+        String name = getFileName(lat, lon);
+        HeightTile demProvider = cacheData.get(name);
+        if (demProvider == null) {
+            if (!cacheDir.exists()) cacheDir.mkdirs();
+
+            int minLat = getMinLatForTile(lat);
+            int minLon = getMinLonForTile(lon);
+            // less restrictive against boundary checking
+            demProvider = new HeightTile(minLat, minLon, WIDTH, HEIGHT,
+                    LON_DEGREE * precision, LON_DEGREE, LAT_DEGREE);
+            demProvider.setInterpolate(interpolate);
+
+            cacheData.put(name, demProvider);
+            DataAccess heights = getDirectory().create(name + ".gh");
+            demProvider.setHeights(heights);
+            boolean loadExisting = false;
+            try {
+                loadExisting = heights.loadExisting();
+            } catch (Exception ex) {
+                logger.warn("cannot load {}, error: {}", name, ex.getMessage());
+            }
+
+            if (!loadExisting) {
+                File file = new File(cacheDir,
+                        new File(getFileNameOfLocalFile(lat, lon)).getName());
+
+                // short == 2 bytes
+                heights.create(2 * WIDTH * HEIGHT);
+
+                Raster raster = generateRasterFromFile(file, name + ".tif");
+                super.fillDataAccessWithElevationData(raster, heights, WIDTH);
+
+            } // loadExisting
+        }
+
+        if (demProvider.isSeaLevel()) return 0;
+        return demProvider.getHeight(lat, lon);
     }
 
     @Override
