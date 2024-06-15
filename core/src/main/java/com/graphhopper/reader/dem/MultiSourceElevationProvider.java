@@ -45,7 +45,7 @@ public class MultiSourceElevationProvider extends TileBasedElevationProvider {
     }
 
     public MultiSourceElevationProvider(String cacheDir) {
-        this(new CGIARProvider(cacheDir), new GMTEDProvider(cacheDir));
+        this(new USGSProvider(cacheDir), new SRTMProvider(cacheDir));
     }
 
     @Override
