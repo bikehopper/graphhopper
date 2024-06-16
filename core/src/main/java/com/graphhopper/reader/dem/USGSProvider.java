@@ -13,17 +13,18 @@ import org.apache.xmlgraphics.image.codec.util.SeekableStream;
 
 public class USGSProvider extends AbstractTiffElevationProvider {
 
-    String filename = "n38w123";
+    String filename = "ned19_n38w122x50";
 
     public USGSProvider(String cacheDir) {
-        this("", cacheDir, "", 10812, 10812, 1, 1);
+        this("", cacheDir, "", 8112, 8112, 0.25, 0.25);
     }
 
     public USGSProvider(String baseUrl, String cacheDir,
-            String downloaderName, int width, int height, int latDegree,
-            int lonDegree) {
+            String downloaderName, int width, int height, double latDegree,
+            double lonDegree) {
         super(baseUrl, cacheDir, downloaderName, width, height, latDegree,
                 lonDegree);
+        setInterpolate(true);
     }
 
     public static void main(String[] args) {
@@ -34,7 +35,17 @@ public class USGSProvider extends AbstractTiffElevationProvider {
         System.out.println("Elevation: " + elevationProvider.getEle(37.79112431722635, -122.39901032204128) + "m");
 
         // Mount Davidson, expected: ~283m
-        System.out.println("Elevation: " + elevationProvider.getEle(37.738259, -122.45463) + "m");
+//        System.out.println("Elevation: " + elevationProvider.getEle(37.738259, -122.45463) + "m");
+
+        // 1/3 AS:
+//        Elevation: 6.0m
+//        Elevation: 4.108689719582383m
+//        Elevation: 278.09820398153596m
+
+        // 1/9 AS:
+        // Elevation: 7.0m
+        // Elevation: 5.0m
+
     }
 
     @Override
@@ -43,13 +54,13 @@ public class USGSProvider extends AbstractTiffElevationProvider {
     }
 
     @Override
-    int getMinLatForTile(double lat) {
-        return 37;
+    double getMinLatForTile(double lat) {
+        return 37.75;
     }
 
     @Override
-    int getMinLonForTile(double lon) {
-        return -123;
+    double getMinLonForTile(double lon) {
+        return -122.5;
     }
 
     @Override
@@ -79,8 +90,8 @@ public class USGSProvider extends AbstractTiffElevationProvider {
         if (demProvider == null) {
             if (!cacheDir.exists()) cacheDir.mkdirs();
 
-            int minLat = getMinLatForTile(lat);
-            int minLon = getMinLonForTile(lon);
+            double minLat = getMinLatForTile(lat);
+            double minLon = getMinLonForTile(lon);
             // less restrictive against boundary checking
             demProvider = new HeightTile(minLat, minLon, WIDTH, HEIGHT,
                     LON_DEGREE * precision, LON_DEGREE, LAT_DEGREE);
