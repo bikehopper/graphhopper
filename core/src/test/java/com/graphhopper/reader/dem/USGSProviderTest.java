@@ -18,7 +18,8 @@ class USGSProviderTest {
     @Test
     public void testMinLon() {
         assertEquals(-122.5, provider.getMinLonForTile(-122.26));
-        assertEquals(-122, provider.getMinLonForTile(-122));
+        assertEquals(-122.25, provider.getMinLonForTile(-122.25));
+        assertEquals(-122.25, provider.getMinLonForTile(-122.24));
     }
 
     @Test
