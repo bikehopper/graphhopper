@@ -13,10 +13,18 @@ class USGSProviderTest {
         assertEquals(37.75, provider.getMinLatForTile(37.76));
         assertEquals(37.5, provider.getMinLatForTile(37.75));
         assertEquals(37.5, provider.getMinLatForTile(37.74));
+
+        assertEquals(-38, provider.getMinLatForTile(-37.76));
+        assertEquals(-37.75, provider.getMinLatForTile(-37.75));
+        assertEquals(-37.75, provider.getMinLatForTile(-37.74));
     }
 
     @Test
     public void testMinLon() {
+        assertEquals(122.25, provider.getMinLonForTile(122.26));
+        assertEquals(122.25, provider.getMinLonForTile(122.25));
+        assertEquals(122, provider.getMinLonForTile(122.24));
+
         assertEquals(-122.5, provider.getMinLonForTile(-122.26));
         assertEquals(-122.25, provider.getMinLonForTile(-122.25));
         assertEquals(-122.25, provider.getMinLonForTile(-122.24));
