@@ -32,19 +32,6 @@ public class USGSProvider extends AbstractTiffElevationProvider {
         // Market Street ~-5ft to 260ft in prod.
         System.out.println("Elevation: " + elevationProvider.getEle(37.7903317182555, -122.39999824547087) + "m");
         System.out.println("Elevation: " + elevationProvider.getEle(37.79112431722635, -122.39901032204128) + "m");
-
-        // Mount Davidson, expected: ~283m
-//        System.out.println("Elevation: " + elevationProvider.getEle(37.738259, -122.45463) + "m");
-
-        // 1/3 AS:
-//        Elevation: 6.0m
-//        Elevation: 4.108689719582383m
-//        Elevation: 278.09820398153596m
-
-        // 1/9 AS:
-        // Elevation: 7.0m
-        // Elevation: 5.0m
-
     }
 
     @Override
