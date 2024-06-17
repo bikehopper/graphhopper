@@ -12,7 +12,7 @@ import org.apache.xmlgraphics.image.codec.tiff.TIFFImageDecoder;
 import org.apache.xmlgraphics.image.codec.util.SeekableStream;
 
 public class USGSProvider extends AbstractTiffElevationProvider {
-
+    // TODO(steveliu): Remove and implement getFileName() instead.
     String filename = "ned19_n38w122x50";
 
     public USGSProvider(String cacheDir) {
@@ -41,21 +41,41 @@ public class USGSProvider extends AbstractTiffElevationProvider {
 
     @Override
     double getMinLatForTile(double lat) {
+        // TODO(steveliu): Implement.
         return 37.75;
     }
 
     @Override
     double getMinLonForTile(double lon) {
+        // TODO(steveliu): Implement.
         return -122.5;
     }
 
     @Override
     String getFileNameOfLocalFile(double lat, double lon) {
+        // TODO(steveliu): Implement.
         return filename + ".tif";
     }
 
+    /**
+     * The USGS National Elevation Dataset (NED)'s 1/9th arc-second offering
+     * categorizes individual 0.25x0.25 degree tiles using the northwestern
+     * corner of each tile. For example, ned19_n37x75_w122x50 means that the
+     * corners of the tile are (starting from the northwestern corner and moving
+     * clockwise):
+     * <ul>
+     *   <li>37.75, -122.50</li>
+     *   <li>37.75, -122.25</li>
+     *   <li>37.50, -122.25</li>
+     *   <li>37.50, -122.50</li>
+     * </ul>
+     * @param lat
+     * @param lon
+     * @return
+     */
     @Override
     String getFileName(double lat, double lon) {
+        // TODO(steveliu): Implement.
         return filename;
     }
 
