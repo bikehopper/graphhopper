@@ -71,23 +71,15 @@ public class USGSProvider extends AbstractTiffElevationProvider {
      */
     @Override
     String getFileName(double lat, double lon) {
-        String filename = "ned19_n";
-
         double latAdjusted = Math.abs(Math.ceil(lat * 4) / 4);
         int latDigits = (int) Math.floor(latAdjusted);
-        filename += latDigits + "x";
-        int latQuarter = (int)(latAdjusted * 100) % 100;
-        if(latQuarter == 0) filename += "0";
-        filename += latQuarter + "_w";
+        int latDecimals = (int)(latAdjusted * 100) % 100;
 
         double lonAdjusted = Math.abs(getMinLonForTile(lon));
         int lonDigits = (int) Math.floor(lonAdjusted);
-        filename += lonDigits + "x";
-        int lonQuarter = (int)(lonAdjusted * 100) % 100;
-        if(lonQuarter == 0) filename += "0";
-        filename += lonQuarter;
+        int lonDecimals = (int)(lonAdjusted * 100) % 100;
 
-        return filename;
+        return String.format("ned19_n%dx%02d_w%dx%02d", latDigits, latDecimals, lonDigits, lonDecimals);
     }
 
     @Override
