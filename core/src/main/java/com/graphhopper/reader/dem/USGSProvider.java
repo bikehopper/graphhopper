@@ -57,9 +57,9 @@ public class USGSProvider extends AbstractTiffElevationProvider {
     /**
      * The USGS National Elevation Dataset (NED)'s 1/9th arc-second DEM offering
      * categorizes individual 0.25x0.25 degree tiles using the northwestern
-     * corner of each tile. For example, ned19_n37x75_w122x50 means that the
-     * corners of the tile are (starting from the northwestern corner and moving
-     * clockwise):
+     * corner of each tile. For example, <i>ned19_n37x75_w122x50</i> means that
+     * the corners of the tile are (starting from the northwestern corner and
+     * moving clockwise):
      * <ul>
      *   <li>37.75, -122.50</li>
      *   <li>37.75, -122.25</li>
@@ -68,7 +68,8 @@ public class USGSProvider extends AbstractTiffElevationProvider {
      * </ul>
      * @param lat latitude in degrees, ranges from [-90.0, 90.0]
      * @param lon longitude in degrees, ranges from [-180.0, 180.0]
-     * @return
+     * @return Filename in format ned19_{n,s}AAxAA_{e,w}BBBxBB;
+     * AAxAA being latitude in degrees and BBBxBB being longitude in degrees
      */
     @Override
     String getFileName(double lat, double lon) {
