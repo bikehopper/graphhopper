@@ -41,13 +41,11 @@ public class USGSProvider extends AbstractTiffElevationProvider {
 
     @Override
     double getMinLatForTile(double lat) {
-        // TODO(steveliu): Implement.
         return (double) Math.floor(lat * 4) / 4;
     }
 
     @Override
     double getMinLonForTile(double lon) {
-        // TODO(steveliu): Implement.
         return (double) Math.floor(lon * 4) / 4;
     }
 
@@ -75,7 +73,6 @@ public class USGSProvider extends AbstractTiffElevationProvider {
      */
     @Override
     String getFileName(double lat, double lon) {
-        // TODO(steveliu): Implement.
         filename = "ned19_";
 
         double latAdjusted = Math.abs(Math.ceil(lat * 4) / 4);
