@@ -12,7 +12,6 @@ import org.apache.xmlgraphics.image.codec.tiff.TIFFImageDecoder;
 import org.apache.xmlgraphics.image.codec.util.SeekableStream;
 
 public class USGSProvider extends AbstractTiffElevationProvider {
-    // TODO(steveliu): Remove and implement getFileName() instead.
     String filename = "ned19_n38w122x50";
 
     public USGSProvider(String cacheDir) {
@@ -41,12 +40,12 @@ public class USGSProvider extends AbstractTiffElevationProvider {
 
     @Override
     double getMinLatForTile(double lat) {
-        return (double) Math.floor(lat * 4) / 4;
+        return Math.floor(lat * 4) / 4;
     }
 
     @Override
     double getMinLonForTile(double lon) {
-        return (double) Math.floor(lon * 4) / 4;
+        return Math.floor(lon * 4) / 4;
     }
 
     @Override
