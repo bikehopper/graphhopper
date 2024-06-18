@@ -74,20 +74,18 @@ public class USGSProvider extends AbstractTiffElevationProvider {
         String filename = "ned19_n";
 
         double latAdjusted = Math.abs(Math.ceil(lat * 4) / 4);
-        String latString = String.valueOf(latAdjusted);
-        int indLat = latString.indexOf('.');
-        if(latString.length() < indLat + 3) {
-            latString += "0";
-        }
-        filename += latString.substring(0, indLat) + "x" + latString.substring(indLat + 1) + "_";
+        int latDigits = (int) Math.floor(latAdjusted);
+        filename += latDigits + "x";
+        int latQuarter = (int)(latAdjusted * 100) % 100;
+        if(latQuarter == 0) filename += "0";
+        filename += latQuarter + "_w";
 
         double lonAdjusted = Math.abs(getMinLonForTile(lon));
-        String lonString = String.valueOf(lonAdjusted);
-        int indLon = lonString.indexOf('.');
-        if(lonString.length() < indLon + 3) {
-            lonString += "0";
-        }
-        filename += "w" + lonString.substring(0, indLon) + "x" + lonString.substring(indLon + 1);
+        int lonDigits = (int) Math.floor(lonAdjusted);
+        filename += lonDigits + "x";
+        int lonQuarter = (int)(lonAdjusted * 100) % 100;
+        if(lonQuarter == 0) filename += "0";
+        filename += lonQuarter;
 
         return filename;
     }
