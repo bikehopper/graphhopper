@@ -12,7 +12,6 @@ import org.apache.xmlgraphics.image.codec.tiff.TIFFImageDecoder;
 import org.apache.xmlgraphics.image.codec.util.SeekableStream;
 
 public class USGSProvider extends AbstractTiffElevationProvider {
-    String filename = "ned19_n38w122x50";
 
     public USGSProvider(String cacheDir) {
         this("", cacheDir, "", 8112, 8112, 0.25, 0.25);
@@ -50,8 +49,7 @@ public class USGSProvider extends AbstractTiffElevationProvider {
 
     @Override
     String getFileNameOfLocalFile(double lat, double lon) {
-        // TODO(steveliu): Implement.
-        return filename + ".tif";
+        return getFileName(lat, lon) + ".tif";
     }
 
     /**
@@ -73,7 +71,7 @@ public class USGSProvider extends AbstractTiffElevationProvider {
      */
     @Override
     String getFileName(double lat, double lon) {
-        filename = "ned19_";
+        String filename = "ned19_n";
 
         double latAdjusted = Math.abs(Math.ceil(lat * 4) / 4);
         String latString = String.valueOf(latAdjusted);
@@ -81,9 +79,9 @@ public class USGSProvider extends AbstractTiffElevationProvider {
         if(latString.length() < indLat + 3) {
             latString += "0";
         }
-        filename += "n" + latString.substring(0, indLat) + "x" + latString.substring(indLat + 1) + "_";
+        filename += latString.substring(0, indLat) + "x" + latString.substring(indLat + 1) + "_";
 
-        double lonAdjusted = Math.abs(Math.floor(lon * 4) / 4);
+        double lonAdjusted = Math.abs(getMinLonForTile(lon));
         String lonString = String.valueOf(lonAdjusted);
         int indLon = lonString.indexOf('.');
         if(lonString.length() < indLon + 3) {
