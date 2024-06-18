@@ -126,4 +126,6 @@ public class USGSProvider extends AbstractTiffElevationProvider {
                 close(ss);
         }
     }
+
+    public String toString() { return "usgs"; }
 }
