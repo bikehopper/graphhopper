@@ -42,13 +42,13 @@ public class USGSProvider extends AbstractTiffElevationProvider {
     @Override
     double getMinLatForTile(double lat) {
         // TODO(steveliu): Implement.
-        return 37.75;
+        return (double) Math.floor(lat * 4) / 4;
     }
 
     @Override
     double getMinLonForTile(double lon) {
         // TODO(steveliu): Implement.
-        return -122.5;
+        return (double) Math.floor(lon * 4) / 4;
     }
 
     @Override
@@ -76,6 +76,24 @@ public class USGSProvider extends AbstractTiffElevationProvider {
     @Override
     String getFileName(double lat, double lon) {
         // TODO(steveliu): Implement.
+        filename = "ned19_";
+
+        double latAdjusted = Math.abs(Math.ceil(lat * 4) / 4);
+        String latString = String.valueOf(latAdjusted);
+        int indLat = latString.indexOf('.');
+        if(latString.length() < indLat + 3) {
+            latString += "0";
+        }
+        filename += "n" + latString.substring(0, indLat) + "x" + latString.substring(indLat + 1) + "_";
+
+        double lonAdjusted = Math.abs(Math.floor(lon * 4) / 4);
+        String lonString = String.valueOf(lonAdjusted);
+        int indLon = lonString.indexOf('.');
+        if(lonString.length() < indLon + 3) {
+            lonString += "0";
+        }
+        filename += "w" + lonString.substring(0, indLon) + "x" + lonString.substring(indLon + 1);
+
         return filename;
     }
 
