@@ -32,9 +32,9 @@ class USGSProviderTest {
 
     @Test
     public void testFilename() {
-        assertEquals("ned19_n38x00w122x50",
+        assertEquals("ned19_n38x00_w122x50",
                 provider.getFileName(38, -122.5));
-        assertEquals("ned19_n38x00w122x50",
+        assertEquals("ned19_n38x00_w122x50",
                 provider.getFileName(37.76, -122.26));
     }
 }
