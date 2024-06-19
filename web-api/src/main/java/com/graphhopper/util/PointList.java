@@ -17,6 +17,8 @@
  */
 package com.graphhopper.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.graphhopper.util.shapes.GHPoint;
 import com.graphhopper.util.shapes.GHPoint3D;
 import org.locationtech.jts.geom.Coordinate;
@@ -25,6 +27,7 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.impl.PackedCoordinateSequence;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -346,6 +349,36 @@ public class PointList implements Iterable<GHPoint3D>, PointAccess {
             }
             sb.append(')');
         }
+        return sb.toString();
+    }
+
+    public String toGeojsonString(HashMap<String, String> properties) {
+        StringBuilder sb = new StringBuilder();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String propJsonString = "{}";
+        try {
+            propJsonString = objectMapper.writeValueAsString(properties);
+        } catch (JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        sb.append("{\"type\": \"Feature\", \"properties\": "+propJsonString+",\"geometry\": {\"type\": \"LineString\", \"coordinates\": [");
+        for (int i = 0; i < size(); i++) {
+            if (i > 0)
+                sb.append(", ");
+
+            sb.append('[');
+            sb.append(this.getLat(i));
+            sb.append(',');
+            sb.append(this.getLon(i));
+            if (this.is3D()) {
+                sb.append(',');
+                sb.append(this.getEle(i));
+            }
+            sb.append(']');
+        }
+
+        sb.append("]}}");
         return sb.toString();
     }
 
