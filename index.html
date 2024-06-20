@@ -49,8 +49,24 @@
                 'source': 'routes-tiles',
                 'paint': {
                 'line-width': 3,
-                'line-color': 'red'
-                }
+                'line-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['line-progress'],
+                    0,
+                    'blue',
+                    5,
+                    'royalblue',
+                    10,
+                    'cyan',
+                    15,
+                    'lime',
+                    20,
+                    'yellow',
+                    25,
+                    'red'
+                ]
+            }
             });
         });
     });

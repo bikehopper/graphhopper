@@ -35,7 +35,7 @@ Requirements:
 
 Run to generate a pmtiles tileset:
 ```
-/graphhopper/logs> $ tippecanoe -zg -l ways_dump -P -o out.pmtiles ways_dump.ldgeojson
+/graphhopper/logs> $ tippecanoe -zg -l ways_dump -P -o out.pmtiles --drop-densest-as-needed ways_dump.ldgeojson
 ```
 
 Run to serve viz page:
