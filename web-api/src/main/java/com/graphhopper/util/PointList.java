@@ -368,9 +368,9 @@ public class PointList implements Iterable<GHPoint3D>, PointAccess {
                 sb.append(", ");
 
             sb.append('[');
-            sb.append(this.getLat(i));
-            sb.append(',');
             sb.append(this.getLon(i));
+            sb.append(',');
+            sb.append(this.getLat(i));
             if (this.is3D()) {
                 sb.append(',');
                 sb.append(this.getEle(i));

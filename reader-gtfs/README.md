@@ -27,6 +27,22 @@ When this is finished you can point your browser to http://localhost:8989
 Alternatively, for a more specialized but more minimal demo of transit routing, to http://localhost:8989/maps/pt/
 (make sure to include the trailing slash).
 
+# Visualizing Processed OSM Ways
+
+Requirements: 
+- `http-server`: https://www.npmjs.com/package/http-server (installed globally)
+- `tippecanoe`: https://github.com/felt/tippecanoe 
+
+Run to generate a pmtiles tileset:
+```
+/graphhopper/logs> $ tippecanoe -zg -l ways_dump -P -o out.pmtiles ways_dump.ldgeojson
+```
+
+Run to serve viz page:
+```
+/graphhopper> $ http-server --cors
+```
+
 # Graph schema
 
 ![Graph schema](pt-model.png)
