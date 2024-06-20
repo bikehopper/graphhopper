@@ -18,9 +18,9 @@
 
 package com.graphhopper.reader.osm;
 
-class SegmentNode {
-    long osmNodeId;
-    int id;
+public class SegmentNode {
+    public long osmNodeId;
+    public int id;
 
     public SegmentNode(long osmNodeId, int id) {
         this.osmNodeId = osmNodeId;
