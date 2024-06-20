@@ -19,6 +19,8 @@ package com.graphhopper.reader.osm;
 
 import com.carrotsearch.hppc.IntLongMap;
 import com.carrotsearch.hppc.LongArrayList;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.graphhopper.coll.GHIntLongHashMap;
 import com.graphhopper.coll.GHLongHashSet;
 import com.graphhopper.coll.GHLongLongHashMap;
@@ -48,6 +50,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -368,23 +371,31 @@ public class OSMReader {
 
         if (ldGeojsonWriter != null) {
             try {
-                HashMap<String, String> props = new HashMap<String, String>();
-                props.put("id", Long.toString(way.getId()));
-                props.put("name", name);
-                props.put("grade", Integer.toString(grade));
+                JsonFactory factory = new JsonFactory();
+                StringWriter writer = new StringWriter();
+                JsonGenerator generator = factory.createGenerator(writer);
+                generator.writeStartObject();
+
+                generator.writeNumberField("id", way.getId());
+                generator.writeStringField("name", name);
+                generator.writeNumberField("grade", grade);
 
                 for(Map.Entry<String, Boolean> entry : tagParserManager.getBooleanEncodedValues(edgeFlags).entrySet()) {
-                    props.put(entry.getKey(), Boolean.toString(entry.getValue()));
+                    generator.writeBooleanField(entry.getKey(), entry.getValue());
                 }
 
                 for(Map.Entry<String, Integer> entry : tagParserManager.getIntEncodedValues(edgeFlags).entrySet()) {
-                    props.put(entry.getKey(), Integer.toString(entry.getValue()));
+                    generator.writeNumberField(entry.getKey(), entry.getValue());
                 }
 
                 for(Map.Entry<String, Double> entry : tagParserManager.getDecimalEncodedValues(edgeFlags).entrySet()) {
-                    props.put(entry.getKey(), Double.toString(entry.getValue()));
+                    generator.writeNumberField(entry.getKey(), entry.getValue());
                 }
 
+                generator.writeEndObject();
+                generator.close();
+
+                String props = writer.toString();
                 ldGeojsonWriter.write(pointList.toGeojsonString(props));
                 ldGeojsonWriter.write("\n");
             } catch (IOException e) {
