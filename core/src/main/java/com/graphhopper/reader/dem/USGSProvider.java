@@ -13,8 +13,6 @@ import org.apache.xmlgraphics.image.codec.util.SeekableStream;
 
 public class USGSProvider extends AbstractTiffElevationProvider {
 
-    String filename = "ned19_n37x75_w122x00_gscale";
-
     public USGSProvider(String cacheDir) {
         this("", cacheDir, "", 8112, 8112, 0.25, 0.25);
     }
@@ -24,17 +22,14 @@ public class USGSProvider extends AbstractTiffElevationProvider {
             double lonDegree) {
         super(baseUrl, cacheDir, downloaderName, width, height, latDegree,
                 lonDegree);
-        setInterpolate(true);
     }
 
     public static void main(String[] args) {
         USGSProvider elevationProvider = new USGSProvider("/tmp/");
 
         // Market Street ~-5ft to 260ft in prod.
-//        System.out.println("Elevation: " + elevationProvider.getEle(37.7903317182555, -122.39999824547087) + "m");
-//        System.out.println("Elevation: " + elevationProvider.getEle(37.79112431722635, -122.39901032204128) + "m");
-        System.out.println("Elevation: " + elevationProvider.getEle(37.7499, -122.0001) + "m");
-        System.out.println("Elevation: " + elevationProvider.getEle(37.5001, -122.0001) + "m");
+        System.out.println("Elevation: " + elevationProvider.getEle(37.7903317182555, -122.39999824547087) + "m");
+        System.out.println("Elevation: " + elevationProvider.getEle(37.79112431722635, -122.39901032204128) + "m");
     }
 
     @Override
@@ -44,22 +39,45 @@ public class USGSProvider extends AbstractTiffElevationProvider {
 
     @Override
     double getMinLatForTile(double lat) {
-        return 37.5;
+        return Math.floor(lat * 4) / 4;
     }
 
     @Override
     double getMinLonForTile(double lon) {
-        return -122.25;
+        return Math.floor(lon * 4) / 4;
     }
 
     @Override
     String getFileNameOfLocalFile(double lat, double lon) {
-        return filename + ".tif";
+        return getFileName(lat, lon) + ".tif";
     }
 
+    /**
+     * The USGS National Elevation Dataset (NED)'s 1/9th arc-second DEM offering
+     * categorizes individual 0.25x0.25 degree tiles using the northwestern
+     * corner of each tile. For example, <i>ned19_n37x75_w122x50</i> means that
+     * the corners of the tile are (starting from the northwestern corner and
+     * moving clockwise):
+     * <ul>
+     *   <li>37.75, -122.50</li>
+     *   <li>37.75, -122.25</li>
+     *   <li>37.50, -122.25</li>
+     *   <li>37.50, -122.50</li>
+     * </ul>
+     * @param lat latitude in degrees, ranges from [-90.0, 90.0]
+     * @param lon longitude in degrees, ranges from [-180.0, 180.0]
+     * @return Filename in format ned19_{n,s}AAxAA_{e,w}BBBxBB;
+     * AAxAA being latitude in degrees and BBBxBB being longitude in degrees
+     */
     @Override
     String getFileName(double lat, double lon) {
-        return filename;
+        double latAdjusted = Math.abs(Math.ceil(lat * 4) / 4);
+        int latDecimals = (int)(latAdjusted * 100) % 100;
+
+        double lonAdjusted = Math.abs(getMinLonForTile(lon));
+        int lonDecimals = (int)(lonAdjusted * 100) % 100;
+
+        return String.format("ned19_n%dx%02d_w%dx%02d", (int) latAdjusted, latDecimals, (int) lonAdjusted, lonDecimals);
     }
 
     @Override
