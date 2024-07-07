@@ -50,7 +50,7 @@ public class MultiSourceElevationProvider extends TileBasedElevationProvider {
 
     @Override
     public double getEle(double lat, double lon) {
-        if (lat > 37.5 && lat < 38.25 && lon > -123 && lon < -122.25)
+        if (lat > 37.5 && lat < 38.25 && lon > -122.75 && lon < -122)
             return primary.getEle(lat, lon);
         return fallback.getEle(lat, lon);
     }
