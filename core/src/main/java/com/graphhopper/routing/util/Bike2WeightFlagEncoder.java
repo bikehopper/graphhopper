@@ -97,12 +97,9 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
         GradeBoundary extremeUpGrade = new GradeBoundary(16, 100);
         grades.add(extremeUpGrade);
 
-        // At downwards grades, the penalty is lessened
-        gradePenaltyMap.put(strongDownGrade, (p) -> {
-            return PenaltyCode.from(p).tickDownBy(3).getValue();
-        });
+        // At slight downwards grades, the penalty is lessened
         gradePenaltyMap.put(mediumDownGrade, (p) -> {
-            return PenaltyCode.from(p).tickDownBy(2).getValue();
+            return PenaltyCode.from(p).tickDownBy(1).getValue();
         });
         gradePenaltyMap.put(mildDownGrade, (p) -> {
             return PenaltyCode.from(p).tickDownBy(1).getValue();
@@ -119,7 +116,12 @@ public class Bike2WeightFlagEncoder extends BikeFlagEncoder {
             return PenaltyCode.from(p).tickUpBy(2).getValue();
         });
         gradePenaltyMap.put(strongUpGrade, (p) -> {
-            return PenaltyCode.from(p).tickUpBy(4).getValue();
+            return PenaltyCode.from(p).tickUpBy(3).getValue();
+        });
+
+        // Strong down grade: have to brake hard, increase penalty
+        gradePenaltyMap.put(strongDownGrade, (p) -> {
+            return PenaltyCode.from(p).tickUpBy(2).getValue();
         });
 
         // At extreme grades, the penalty is vastly increased
