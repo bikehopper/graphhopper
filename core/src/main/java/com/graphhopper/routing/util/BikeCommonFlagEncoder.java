@@ -152,7 +152,7 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         setSurfaceSpeed("wood", 6);
 
         setHighwaySpeed("living_street", 6);
-        setHighwaySpeed("steps", PUSHING_SECTION_SPEED / 2);
+        setHighwaySpeed("steps", PUSHING_SECTION_SPEED / 4);
         avoidHighwayTags.add("steps");
 
         final int CYCLEWAY_SPEED = 18;  // Make sure cycleway and path use same speed value, see #634
