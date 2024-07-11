@@ -38,7 +38,7 @@ public class BikeFlagEncoder extends BikeCommonFlagEncoder {
         this(properties.getString("name", "bike"),
                 properties.getInt("speed_bits", 4),
                 properties.getInt("speed_factor", 2),
-                properties.getBool("turn_costs", false) ? 1 : 0,
+                properties.getBool("turn_costs", false) ? 128 : 0,
                 properties.getBool("speed_two_directions", false),
                 properties.getBool("use_ferries", true));
 

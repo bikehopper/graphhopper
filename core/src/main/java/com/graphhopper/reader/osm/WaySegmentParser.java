@@ -112,7 +112,8 @@ public class WaySegmentParser {
 
         long nodes = nodeData.getNodeCount();
 
-        LOGGER.info("Creating graph. Node count (pillar+tower): " + nodes + ", " + Helper.getMemInfo());
+        LOGGER.info("Creating graph. Node count (pillar+tower): {}, {}", nodes,
+                Helper.getMemInfo());
 
         LOGGER.info("pass2 - start");
         StopWatch sw2 = new StopWatch().start();
@@ -121,10 +122,10 @@ public class WaySegmentParser {
 
         nodeData.release();
 
-        LOGGER.info("Finished reading OSM file." +
-                " pass1: " + (int) sw1.getSeconds() + "s, " +
-                " pass2: " + (int) sw2.getSeconds() + "s, " +
-                " total: " + (int) (sw1.getSeconds() + sw2.getSeconds()) + "s");
+        LOGGER.info(
+                "Finished reading OSM file. pass1: {}s,  pass2: {}s,  total: {}s",
+                (int) sw1.getSeconds(), (int) sw2.getSeconds(),
+                (int) (sw1.getSeconds() + sw2.getSeconds()));
     }
 
     /**
@@ -151,8 +152,10 @@ public class WaySegmentParser {
                 throw new IllegalStateException("OSM way elements must be located before relation elements in OSM file");
 
             if (++wayCounter % 10_000_000 == 0)
-                LOGGER.info("pass1 - processed ways: " + nf(wayCounter) + ", accepted ways: " + nf(acceptedWays) +
-                        ", way nodes: " + nf(nodeData.getNodeCount()) + ", " + Helper.getMemInfo());
+                LOGGER.info(
+                        "pass1 - processed ways: {}, accepted ways: {}, way nodes: {}, {}",
+                        nf(wayCounter), nf(acceptedWays),
+                        nf(nodeData.getNodeCount()), Helper.getMemInfo());
 
             if (!wayFilter.test(way))
                 return;
@@ -176,7 +179,8 @@ public class WaySegmentParser {
             }
 
             if (++relationsCounter % 1_000_000 == 0)
-                LOGGER.info("pass1 - processed relations: " + nf(relationsCounter) + ", " + Helper.getMemInfo());
+                LOGGER.info("pass1 - processed relations: {}, {}",
+                        nf(relationsCounter), Helper.getMemInfo());
 
             relationPreprocessor.accept(relation);
         }
@@ -188,9 +192,11 @@ public class WaySegmentParser {
 
         @Override
         public void onFinish() {
-            LOGGER.info("pass1 - finished, processed ways: " + nf(wayCounter) + ", accepted ways: " +
-                    nf(acceptedWays) + ", way nodes: " + nf(nodeData.getNodeCount()) + ", relations: " +
-                    nf(relationsCounter) + ", " + Helper.getMemInfo());
+            LOGGER.info(
+                    "pass1 - finished, processed ways: {}, accepted ways: {}, way nodes: {}, relations: {}, {}",
+                    nf(wayCounter), nf(acceptedWays),
+                    nf(nodeData.getNodeCount()), nf(relationsCounter),
+                    Helper.getMemInfo());
         }
     }
 
