@@ -34,7 +34,7 @@ public class USGSProvider extends AbstractTiffElevationProvider {
 
     @Override
     boolean isOutsideSupportedArea(double lat, double lon) {
-        return lat < 37 || lat > 38 || lon < -123 || lon > -122;
+        return lat < 37.5 || lat > 38.25 || lon < -122.75 || lon > -122;
     }
 
     @Override
