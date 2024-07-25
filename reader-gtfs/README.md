@@ -32,15 +32,17 @@ Alternatively, for a more specialized but more minimal demo of transit routing, 
 Requirements: 
 - `http-server`: https://www.npmjs.com/package/http-server (installed globally)
 - `tippecanoe`: https://github.com/felt/tippecanoe 
+- A MapLibre API key (for visualizing maps only)
 
 Run to generate a pmtiles tileset:
 ```
 /graphhopper/logs> $ tippecanoe -z14 -Z8 -l ways_dump -P -o out.pmtiles --drop-fraction-as-needed ways_dump.ldgeojson
 ```
+- Add a your MapLibre API key to `readger-gtfs/index.html`
 
 Run to serve viz page:
 ```
-/graphhopper> $ http-server --cors
+/graphhopper/reader-gtfs> $ http-server --cors
 ```
 
 # Graph schema

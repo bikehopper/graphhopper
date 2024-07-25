@@ -110,9 +110,11 @@ public class OSMReader {
         turnCostStorage = baseGraph.getTurnCostStorage();
 
         try {
-            Path filePath = Paths.get("logs/ways_dump.ldgeojson");
-            Files.deleteIfExists(filePath);
-            ldGeojsonWriter = Files.newBufferedWriter(filePath, StandardOpenOption.CREATE);
+            if (config.shouldDumpWays()){
+                Path filePath = Paths.get(config.getWaysDumpPath());
+                Files.deleteIfExists(filePath);
+                ldGeojsonWriter = Files.newBufferedWriter(filePath, StandardOpenOption.CREATE);
+            }
         } catch (Exception e) {
             LOGGER.error("Error creating logs/ways_dump.ldgeojson file writer");
             e.printStackTrace();

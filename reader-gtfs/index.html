@@ -32,7 +32,7 @@
     p.getHeader().then(h => {
         var map = new maplibregl.Map({
             container: 'map', // container id
-            style: 'https://api.maptiler.com/maps/basic-v2-dark/style.json?key=WT4VsZ6xeluYL5zzsbwL', // style URL
+            style: 'https://api.maptiler.com/maps/basic-v2-dark/style.json?key=<MAP_LIBRE_KEY_HERE>', // style URL
             center: [0, 0], // starting position [lng, lat]
             zoom: 1 // starting zoom
         });
@@ -53,14 +53,9 @@
                     'interpolate',
                     ['linear'],
                     ['to-number', ['get', 'bike2$penalty']],
-                    0, 'rgb(252, 255, 164)',
-                    0.5, 'rgb(250, 193, 39)',
-                    1, 'rgb(245, 125, 21)',
-                    1.5, 'rgb(212, 72, 66)',
-                    2, 'rgb(159, 42, 99)',
-                    2.5, 'rgb(101, 21, 110)',
-                    3, 'rgb(40, 11, 84)',
-                    3.5, 'rgb(0, 0, 4)',
+                    1, 'rgb(194,217,85)',
+                    7, 'rgb(219,157,0)',
+                    15, 'rgb(216,98,0)',
                 ]
             }
             });
