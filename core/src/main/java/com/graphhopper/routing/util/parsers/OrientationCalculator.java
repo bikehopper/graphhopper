@@ -35,19 +35,19 @@ public class OrientationCalculator implements TagParser {
             // Use the end of the edge to calculate a way's orientation.
             GHPoint3D point1 = points.get(points.size() - 2);
             GHPoint3D point2 = points.get(points.size() - 1);
-            double orientationRad = ANGLE_CALC.calcOrientation(
+            double orientationDegrees = ANGLE_CALC.calcAzimuth(
                     point1.getLat(), point1.getLon(),
                     point2.getLat(), point2.getLon());
-            orientationEnc.setDecimal(false, edgeFlags, orientationRad);
+            orientationEnc.setDecimal(false, edgeFlags, orientationDegrees);
 
             // Use the beginning of the edge to calculate a way's orientation
             // for the reverse direction.
             GHPoint3D point1Rev = points.get(1);
             GHPoint3D point2Rev = points.get(0);
-            double orientationRevRad = ANGLE_CALC.calcOrientation(
+            double orientationRevDegrees = ANGLE_CALC.calcOrientation(
                     point1Rev.getLat(), point1Rev.getLon(),
                     point2Rev.getLat(), point2Rev.getLon());
-            orientationEnc.setDecimal(true, edgeFlags, orientationRevRad);
+            orientationEnc.setDecimal(true, edgeFlags, orientationRevDegrees);
         }
         return edgeFlags;
     }

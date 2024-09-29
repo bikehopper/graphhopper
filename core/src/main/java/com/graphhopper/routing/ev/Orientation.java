@@ -4,7 +4,7 @@ public class Orientation {
     public static final String KEY = "orientation";
 
     public static DecimalEncodedValue create() {
-        return new DecimalEncodedValueImpl(KEY, 9, -Math.PI, 2 * Math.PI / 360,
+        return new DecimalEncodedValueImpl(KEY, 8, 0, 360 / 60.0,
                 false, false, true, false);
     }
 }
