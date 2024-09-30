@@ -19,56 +19,94 @@
 package com.graphhopper.routing.weighting;
 
 import com.graphhopper.routing.ev.DecimalEncodedValue;
-import com.graphhopper.routing.ev.TurnCost;
 import com.graphhopper.routing.util.FlagEncoder;
+import com.graphhopper.routing.util.TurnCostsConfig;
+import com.graphhopper.storage.BaseGraph;
+import com.graphhopper.storage.Graph;
 import com.graphhopper.storage.TurnCostStorage;
 import com.graphhopper.util.EdgeIterator;
-
-import static com.graphhopper.routing.weighting.Weighting.INFINITE_U_TURN_COSTS;
+import com.graphhopper.util.EdgeIteratorState;
 
 public class DefaultTurnCostProvider implements TurnCostProvider {
-    private final DecimalEncodedValue turnCostEnc;
-    private final TurnCostStorage turnCostStorage;
-    private final int uTurnCostsInt;
     private final double uTurnCosts;
 
+    private final double minAngle;
+    private final double minSharpAngle;
+    private final double minUTurnAngle;
+
+    private final double leftCosts;
+    private final double leftSharpCosts;
+    private final double rightCosts;
+    private final double rightSharpCosts;
+    private final BaseGraph graph;
+    private final DecimalEncodedValue orientationEnc;
+
+    // Graphhopper constructors that functionally do nothing.
     public DefaultTurnCostProvider(FlagEncoder encoder, TurnCostStorage turnCostStorage) {
         this(encoder, turnCostStorage, Weighting.INFINITE_U_TURN_COSTS);
     }
 
-    /**
-     * @param uTurnCosts the costs of a u-turn in seconds, for {@link Weighting#INFINITE_U_TURN_COSTS} the u-turn costs
-     *                   will be infinite
-     */
     public DefaultTurnCostProvider(FlagEncoder encoder, TurnCostStorage turnCostStorage, int uTurnCosts) {
-        if (uTurnCosts < 0 && uTurnCosts != INFINITE_U_TURN_COSTS) {
-            throw new IllegalArgumentException("u-turn costs must be positive, or equal to " + INFINITE_U_TURN_COSTS + " (=infinite costs)");
-        }
-        this.uTurnCostsInt = uTurnCosts;
         this.uTurnCosts = uTurnCosts < 0 ? Double.POSITIVE_INFINITY : uTurnCosts;
-        if (turnCostStorage == null) {
+        TurnCostsConfig config = new TurnCostsConfig();
+        this.minAngle = config.getMinAngleDegrees();
+        this.minSharpAngle = config.getMinSharpAngleDegrees();
+        this.minUTurnAngle = config.getMinUTurnAngleDegrees();
+
+        this.leftCosts = config.getLeftCostSeconds();
+        this.leftSharpCosts = config.getLeftSharpCostSeconds();
+        this.rightCosts = config.getRightCostSeconds();
+        this.rightSharpCosts = config.getRightSharpCostSeconds();
+        this.graph = null;
+        this.orientationEnc = null;
+    }
+
+    public DefaultTurnCostProvider(DecimalEncodedValue orientationEnc,
+            Graph graph, TurnCostsConfig tcConfig) {
+        this.uTurnCosts = tcConfig.getUTurnCostSeconds() < 0 ? Double.POSITIVE_INFINITY : tcConfig.getUTurnCostSeconds();
+        if (graph.getTurnCostStorage() == null) {
             throw new IllegalArgumentException("No storage set to calculate turn weight");
         }
-        String key = TurnCost.key(encoder.toString());
-        // if null the TurnCostProvider can be still useful for edge-based routing
-        this.turnCostEnc = encoder.hasEncodedValue(key) ? encoder.getDecimalEncodedValue(key) : null;
-        this.turnCostStorage = turnCostStorage;
+
+        this.orientationEnc = orientationEnc;
+
+        this.minAngle = tcConfig.getMinAngleDegrees();
+        this.minSharpAngle = tcConfig.getMinSharpAngleDegrees();
+        this.minUTurnAngle = tcConfig.getMinUTurnAngleDegrees();
+
+        this.leftCosts = tcConfig.getLeftCostSeconds();
+        this.leftSharpCosts = tcConfig.getLeftSharpCostSeconds();
+        this.rightCosts = tcConfig.getRightCostSeconds();
+        this.rightSharpCosts = tcConfig.getRightSharpCostSeconds();
+
+        this.graph = graph.getBaseGraph();
     }
 
     @Override
-    public double calcTurnWeight(int edgeFrom, int nodeVia, int edgeTo) {
-        if (!EdgeIterator.Edge.isValid(edgeFrom) || !EdgeIterator.Edge.isValid(edgeTo)) {
+    public double calcTurnWeight(int inEdge, int viaNode, int outEdge) {
+        if (!EdgeIterator.Edge.isValid(inEdge) || !EdgeIterator.Edge.isValid(outEdge))
             return 0;
+
+        // note that the u-turn costs overwrite any turn costs set in TurnCostStorage
+        if (inEdge == outEdge) return uTurnCosts;
+
+        if (orientationEnc != null) {
+            double changeAngle = calcChangeAngle(inEdge, viaNode, outEdge);
+            if (changeAngle > -minAngle && changeAngle < minAngle)
+                return 0.0;
+            else if (changeAngle >= minAngle && changeAngle < minSharpAngle)
+                return rightCosts;
+            else if (changeAngle >= minSharpAngle && changeAngle <= minUTurnAngle)
+                return rightSharpCosts;
+            else if (changeAngle <= -minAngle && changeAngle > -minSharpAngle)
+                return leftCosts;
+            else if (changeAngle <= -minSharpAngle && changeAngle >= -minUTurnAngle)
+                return leftSharpCosts;
+
+            // Too sharp turn is like an u-turn.
+            return uTurnCosts;
         }
-        double tCost = 0;
-        if (edgeFrom == edgeTo) {
-            // note that the u-turn costs overwrite any turn costs set in TurnCostStorage
-            tCost = uTurnCosts;
-        } else {
-            if (turnCostEnc != null)
-                tCost = turnCostStorage.get(turnCostEnc, edgeFrom, nodeVia, edgeTo);
-        }
-        return tCost;
+        return 0;
     }
 
     @Override
@@ -77,7 +115,26 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
     }
 
     @Override
-    public String toString() {
-        return "default_tcp_" + uTurnCostsInt;
+    public String toString() { return "default_tcp_"; }
+
+    double calcChangeAngle(int inEdge, int viaNode, int outEdge) {
+        EdgeIteratorState inEdgeState = graph.getEdgeIteratorStateForKey(inEdge);
+        EdgeIteratorState outEdgeState = graph.getEdgeIteratorStateForKey(outEdge);
+        boolean inEdgeReverse = !graph.isAdjacentToNode(inEdge, viaNode);
+        double prevAzimuth = orientationEnc.getDecimal(inEdgeReverse, inEdgeState.getFlags());
+
+        boolean outEdgeReverse = !graph.isAdjacentToNode(outEdge, viaNode);
+        double azimuth = orientationEnc.getDecimal(outEdgeReverse, outEdgeState.getFlags());
+
+        // bring parallel to prevOrientation
+        if (azimuth >= 180) azimuth -= 180;
+        else azimuth += 180;
+
+        double changeAngle = azimuth - prevAzimuth;
+
+        // keep in [-180, 180]
+        if (changeAngle > 180) changeAngle -= 360;
+        else if (changeAngle < -180) changeAngle += 360;
+        return changeAngle;
     }
 }
