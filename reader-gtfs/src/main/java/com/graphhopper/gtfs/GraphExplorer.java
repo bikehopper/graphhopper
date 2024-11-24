@@ -280,7 +280,7 @@ public final class GraphExplorer {
         public MultiModalEdge(PtGraph.PtEdge ptEdge, double weight) {
             this.ptEdge = ptEdge;
             if ((getType() == GtfsStorage.EdgeType.ENTER_PT || getType() == GtfsStorage.EdgeType.EXIT_PT || getType() == GtfsStorage.EdgeType.TRANSFER) && getRouteType() == 3) {
-                weight *= 2.575;
+                weight *= 2.175;
                 // 2.175 is where the train-bus-bus route gets removed
             }
             this.weight = weight;
