@@ -18,21 +18,28 @@
 
 package com.graphhopper.routing;
 
+import static com.graphhopper.routing.weighting.TurnCostProvider.NO_TURN_COST_PROVIDER;
+import static com.graphhopper.util.Helper.toLowerCase;
+
 import com.graphhopper.config.Profile;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.FlagEncoder;
-import com.graphhopper.routing.weighting.*;
+import com.graphhopper.routing.util.TurnCostsConfig;
+import com.graphhopper.routing.weighting.CurvatureWeighting;
+import com.graphhopper.routing.weighting.DefaultTurnCostProvider;
+import com.graphhopper.routing.weighting.FastestWeighting;
+import com.graphhopper.routing.weighting.PenaltyWeighting;
+import com.graphhopper.routing.weighting.PriorityWeighting;
+import com.graphhopper.routing.weighting.ShortFastestWeighting;
+import com.graphhopper.routing.weighting.ShortestWeighting;
+import com.graphhopper.routing.weighting.TurnCostProvider;
+import com.graphhopper.routing.weighting.Weighting;
 import com.graphhopper.routing.weighting.custom.CustomModelParser;
 import com.graphhopper.routing.weighting.custom.CustomProfile;
 import com.graphhopper.routing.weighting.custom.CustomWeighting;
 import com.graphhopper.storage.BaseGraph;
 import com.graphhopper.util.CustomModel;
 import com.graphhopper.util.PMap;
-import com.graphhopper.util.Parameters;
-
-import static com.graphhopper.routing.weighting.TurnCostProvider.NO_TURN_COST_PROVIDER;
-import static com.graphhopper.routing.weighting.Weighting.INFINITE_U_TURN_COSTS;
-import static com.graphhopper.util.Helper.toLowerCase;
 
 public class DefaultWeightingFactory implements WeightingFactory {
     private final BaseGraph graph;
@@ -59,8 +66,7 @@ public class DefaultWeightingFactory implements WeightingFactory {
         if (profile.isTurnCosts() && !disableTurnCosts) {
             if (!encoder.supportsTurnCosts())
                 throw new IllegalArgumentException("Encoder " + encoder + " does not support turn costs");
-            int uTurnCosts = hints.getInt(Parameters.Routing.U_TURN_COSTS, INFINITE_U_TURN_COSTS);
-            turnCostProvider = new DefaultTurnCostProvider(encoder, graph.getTurnCostStorage(), uTurnCosts);
+            turnCostProvider = new DefaultTurnCostProvider(graph, new TurnCostsConfig());
         } else {
             turnCostProvider = NO_TURN_COST_PROVIDER;
         }

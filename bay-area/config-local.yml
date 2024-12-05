@@ -1,7 +1,7 @@
 graphhopper:
 
   # OpenStreetMap input file PBF or XML, can be changed via command line -Ddw.graphhopper.datareader.file=some.pbf
-  datareader.file: data/norcal-latest.osm.pbf
+  datareader.file: data/bay-area.osm.pbf
   gtfs.file: data/GTFSTransitData_RG.zip
   # Local folder used by graphhopper to store its data
   graph.location: graph-cache
@@ -53,6 +53,8 @@ graphhopper:
       weighting: fastest
       use_ferries: false
       snap_preventions: footway
+      u_turn_costs: 60
+      turn_costs: true
     - name: foot
       vehicle: foot
       weighting: fastest
