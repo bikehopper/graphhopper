@@ -220,6 +220,8 @@ public class EncodingManager implements EncodedValueLookup {
                     BooleanEncodedValue accessEnc = encoder.getAccessEnc();
                     DecimalEncodedValue turnCostEnc = TurnCost.create(encoder.toString(), encoder.getMaxTurnCosts());
                     _addTurnCostParser(new OSMTurnRelationParser(accessEnc, turnCostEnc, encoder.getRestrictions()));
+                    // TODO(rohit): Replace constructor params with actual objects.
+                    TurnCostsInitializer turnCostsInitializer = new TurnCostsInitializer(null, null);
                 }
             }
 

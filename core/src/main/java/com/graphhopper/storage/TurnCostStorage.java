@@ -28,8 +28,7 @@ import com.graphhopper.util.EdgeIterator;
  * <p>
  * Like IntRefs on edges, this can in principle be used to store values of any kind.
  * <p>
- * In practice, the IntRefs are used to store generalized travel costs per turn relation per vehicle type.
- * In practice, we only store 0 or infinity. (Can turn, or cannot turn.)
+ * The IntRefs store generalized travel costs per turn relation per vehicle type.
  *
  * @author Karl Hübner
  * @author Peter Karich
