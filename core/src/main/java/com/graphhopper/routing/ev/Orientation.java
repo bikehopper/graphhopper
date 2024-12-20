@@ -8,6 +8,3 @@ public class Orientation {
                 true, false);
     }
 }
-
-//(String name, int bits, double minValue, double factor, boolean defaultIsInfinity,
-// boolean negateReverseDirection, boolean storeTwoDirections, boolean useMaximumAsInfinity)
