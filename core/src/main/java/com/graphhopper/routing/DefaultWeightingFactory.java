@@ -19,8 +19,11 @@
 package com.graphhopper.routing;
 
 import com.graphhopper.config.Profile;
+import com.graphhopper.routing.ev.DecimalEncodedValue;
+import com.graphhopper.routing.ev.Orientation;
 import com.graphhopper.routing.util.EncodingManager;
 import com.graphhopper.routing.util.FlagEncoder;
+import com.graphhopper.routing.util.TurnCostsConfig;
 import com.graphhopper.routing.weighting.*;
 import com.graphhopper.routing.weighting.custom.CustomModelParser;
 import com.graphhopper.routing.weighting.custom.CustomProfile;
@@ -59,8 +62,9 @@ public class DefaultWeightingFactory implements WeightingFactory {
         if (profile.isTurnCosts() && !disableTurnCosts) {
             if (!encoder.supportsTurnCosts())
                 throw new IllegalArgumentException("Encoder " + encoder + " does not support turn costs");
-            int uTurnCosts = hints.getInt(Parameters.Routing.U_TURN_COSTS, INFINITE_U_TURN_COSTS);
-            turnCostProvider = new DefaultTurnCostProvider(encoder, graph.getTurnCostStorage(), uTurnCosts);
+            DecimalEncodedValue orientationEnc = encodingManager.hasEncodedValue(
+                    Orientation.KEY) ? encodingManager.getDecimalEncodedValue(Orientation.KEY) : null;
+            turnCostProvider = new DefaultTurnCostProvider(orientationEnc, graph, new TurnCostsConfig());
         } else {
             turnCostProvider = NO_TURN_COST_PROVIDER;
         }
