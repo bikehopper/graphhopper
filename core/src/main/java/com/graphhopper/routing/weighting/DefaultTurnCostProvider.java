@@ -19,65 +19,48 @@
 package com.graphhopper.routing.weighting;
 
 import com.graphhopper.routing.ev.DecimalEncodedValue;
-import com.graphhopper.routing.ev.TurnCost;
-import com.graphhopper.routing.util.FlagEncoder;
-import com.graphhopper.storage.TurnCostStorage;
-import com.graphhopper.util.EdgeIterator;
-
-import static com.graphhopper.routing.weighting.Weighting.INFINITE_U_TURN_COSTS;
+import com.graphhopper.storage.BaseGraph;
+import com.graphhopper.util.EdgeIteratorState;
 
 public class DefaultTurnCostProvider implements TurnCostProvider {
-    private final DecimalEncodedValue turnCostEnc;
-    private final TurnCostStorage turnCostStorage;
-    private final int uTurnCostsInt;
-    private final double uTurnCosts;
+    private final DecimalEncodedValue orientationEnc;
+    private final BaseGraph graph;
 
-    public DefaultTurnCostProvider(FlagEncoder encoder, TurnCostStorage turnCostStorage) {
-        this(encoder, turnCostStorage, Weighting.INFINITE_U_TURN_COSTS);
-    }
-
-    /**
-     * @param uTurnCosts the costs of a u-turn in seconds, for {@link Weighting#INFINITE_U_TURN_COSTS} the u-turn costs
-     *                   will be infinite
-     */
-    public DefaultTurnCostProvider(FlagEncoder encoder, TurnCostStorage turnCostStorage, int uTurnCosts) {
-        if (uTurnCosts < 0 && uTurnCosts != INFINITE_U_TURN_COSTS) {
-            throw new IllegalArgumentException("u-turn costs must be positive, or equal to " + INFINITE_U_TURN_COSTS + " (=infinite costs)");
-        }
-        this.uTurnCostsInt = uTurnCosts;
-        this.uTurnCosts = uTurnCosts < 0 ? Double.POSITIVE_INFINITY : uTurnCosts;
-        if (turnCostStorage == null) {
-            throw new IllegalArgumentException("No storage set to calculate turn weight");
-        }
-        String key = TurnCost.key(encoder.toString());
-        // if null the TurnCostProvider can be still useful for edge-based routing
-        this.turnCostEnc = encoder.hasEncodedValue(key) ? encoder.getDecimalEncodedValue(key) : null;
-        this.turnCostStorage = turnCostStorage;
+    public DefaultTurnCostProvider(DecimalEncodedValue orientationEnc, BaseGraph graph) {
+        this.orientationEnc = orientationEnc;
+        this.graph = graph;
     }
 
     @Override
-    public double calcTurnWeight(int edgeFrom, int nodeVia, int edgeTo) {
-        if (!EdgeIterator.Edge.isValid(edgeFrom) || !EdgeIterator.Edge.isValid(edgeTo)) {
-            return 0;
-        }
-        double tCost = 0;
-        if (edgeFrom == edgeTo) {
-            // note that the u-turn costs overwrite any turn costs set in TurnCostStorage
-            tCost = uTurnCosts;
-        } else {
-            if (turnCostEnc != null)
-                tCost = turnCostStorage.get(turnCostEnc, edgeFrom, nodeVia, edgeTo);
-        }
-        return tCost;
+    public double calcTurnWeight(int inEdge, int viaNode, int outEdge) {
+        return 0;
     }
 
     @Override
     public long calcTurnMillis(int inEdge, int viaNode, int outEdge) {
-        return (long) (1000 * calcTurnWeight(inEdge, viaNode, outEdge));
+        return 0;
     }
 
     @Override
     public String toString() {
-        return "default_tcp_" + uTurnCostsInt;
+        return "default_tcp";
+    }
+
+    double calcChangeAngle(int inEdge, int viaNode, int outEdge) {
+        EdgeIteratorState edge1 = graph.getEdgeIteratorState(inEdge, viaNode);
+        EdgeIteratorState edge2 = graph.getEdgeIteratorState(outEdge, viaNode);
+        boolean inEdgeReverse = !graph.isAdjacentToNode(inEdge, viaNode);
+        boolean outEdgeReverse = !graph.isAdjacentToNode(outEdge, viaNode);
+
+        double prevAzimuth = orientationEnc.getDecimal(inEdgeReverse,
+                edge1.getFlags());
+        double azimuth = orientationEnc.getDecimal(outEdgeReverse,
+                edge2.getFlags());
+
+        azimuth += (azimuth >= 180 ? -180 : 180);
+        double changeAngle = azimuth - prevAzimuth;
+        if (changeAngle > 180) changeAngle -= 360;
+        else if (changeAngle < -180) changeAngle += 360;
+        return changeAngle;
     }
 }
