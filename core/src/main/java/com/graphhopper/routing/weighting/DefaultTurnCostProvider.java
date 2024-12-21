@@ -19,8 +19,10 @@
 package com.graphhopper.routing.weighting;
 
 import com.graphhopper.routing.ev.DecimalEncodedValue;
+import com.graphhopper.routing.util.FlagEncoder;
 import com.graphhopper.routing.util.TurnCostsConfig;
 import com.graphhopper.storage.BaseGraph;
+import com.graphhopper.storage.TurnCostStorage;
 import com.graphhopper.util.EdgeIterator;
 import com.graphhopper.util.EdgeIteratorState;
 
@@ -41,15 +43,37 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
         this.graph = graph;
         this.config = config;
 
-        this.leftCosts = config.getLeftCostsSeconds();
-        this.leftSharpCosts = config.getLeftSharpCostsSeconds();
-        this.rightCosts = config.getRightCostsSeconds();
-        this.rightSharpCosts = config.getRightSharpCostsSeconds();
-        this.uTurnCosts = config.getUTurnCostsSeconds();
+        this.leftCosts = this.config.getLeftCostsSeconds();
+        this.leftSharpCosts = this.config.getLeftSharpCostsSeconds();
+        this.rightCosts = this.config.getRightCostsSeconds();
+        this.rightSharpCosts = this.config.getRightSharpCostsSeconds();
+        this.uTurnCosts = this.config.getUTurnCostsSeconds();
 
-        this.minAngle = config.getMinAngleDegrees();
-        this.minSharpAngle = config.getMinSharpAngleDegrees();
-        this.minUTurnAngle = config.getMinUTurnAngleDegrees();
+        this.minAngle = this.config.getMinAngleDegrees();
+        this.minSharpAngle = this.config.getMinSharpAngleDegrees();
+        this.minUTurnAngle = this.config.getMinUTurnAngleDegrees();
+    }
+
+    // Ensures that unit tests compile.
+    public DefaultTurnCostProvider(FlagEncoder encoder, TurnCostStorage turnCostStorage) {
+        this(encoder, turnCostStorage, 0);
+    }
+
+    public DefaultTurnCostProvider(FlagEncoder encoder, TurnCostStorage turnCostStorage,
+            int uTurnCosts) {
+        this.orientationEnc = null;
+        this.graph = null;
+        this.config = new TurnCostsConfig();
+
+        this.leftCosts = this.config.getLeftCostsSeconds();
+        this.leftSharpCosts = this.config.getLeftSharpCostsSeconds();
+        this.rightCosts = this.config.getRightCostsSeconds();
+        this.rightSharpCosts = this.config.getRightSharpCostsSeconds();
+        this.uTurnCosts = this.config.getUTurnCostsSeconds();
+
+        this.minAngle = this.config.getMinAngleDegrees();
+        this.minSharpAngle = this.config.getMinSharpAngleDegrees();
+        this.minUTurnAngle = this.config.getMinUTurnAngleDegrees();
     }
 
     @Override
