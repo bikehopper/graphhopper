@@ -30,6 +30,14 @@ public class TurnCostsConfig {
         return minAngleDegrees;
     }
 
+    public double getMinSharpAngleDegrees() {
+        return minSharpAngleDegrees;
+    }
+
+    public double getMinUTurnAngleDegrees() {
+        return minUTurnAngleDegrees;
+    }
+
     public double getUTurnCostsSeconds() {
         return uTurnCostsSeconds;
     }
