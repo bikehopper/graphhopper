@@ -19,20 +19,62 @@
 package com.graphhopper.routing.weighting;
 
 import com.graphhopper.routing.ev.DecimalEncodedValue;
+import com.graphhopper.routing.util.TurnCostsConfig;
 import com.graphhopper.storage.BaseGraph;
+import com.graphhopper.util.EdgeIterator;
 import com.graphhopper.util.EdgeIteratorState;
 
 public class DefaultTurnCostProvider implements TurnCostProvider {
     private final DecimalEncodedValue orientationEnc;
     private final BaseGraph graph;
+    private final TurnCostsConfig config;
 
-    public DefaultTurnCostProvider(DecimalEncodedValue orientationEnc, BaseGraph graph) {
+    private final double leftCosts, leftSharpCosts;
+    private final double rightCosts, rightSharpCosts;
+    private final double uTurnCosts;
+
+    private final double minAngle, minSharpAngle;
+    private final double minUTurnAngle;
+
+    public DefaultTurnCostProvider(DecimalEncodedValue orientationEnc, BaseGraph graph, TurnCostsConfig config) {
         this.orientationEnc = orientationEnc;
         this.graph = graph;
+        this.config = config;
+
+        this.leftCosts = config.getLeftCostsSeconds();
+        this.leftSharpCosts = config.getLeftSharpCostsSeconds();
+        this.rightCosts = config.getRightCostsSeconds();
+        this.rightSharpCosts = config.getRightSharpCostsSeconds();
+        this.uTurnCosts = config.getUTurnCostsSeconds();
+
+        this.minAngle = config.getMinAngleDegrees();
+        this.minSharpAngle = config.getMinSharpAngleDegrees();
+        this.minUTurnAngle = config.getMinUTurnAngleDegrees();
     }
 
     @Override
     public double calcTurnWeight(int inEdge, int viaNode, int outEdge) {
+        if (!EdgeIterator.Edge.isValid(inEdge) || !EdgeIterator.Edge.isValid(outEdge))
+            return 0;
+        if (inEdge == outEdge)
+            return config.getUTurnCostsSeconds();
+
+        // also need to handle restricted turns using TCS, but maybe later.
+
+        if (orientationEnc != null) {
+           double angle = calcChangeAngle(inEdge, viaNode, outEdge);
+            if (angle >= minAngle && angle < minSharpAngle)
+                return rightCosts;
+            else if (angle >= minSharpAngle && angle <= minUTurnAngle)
+                return rightSharpCosts;
+            else if (angle <= -minAngle && angle > -minSharpAngle)
+                return leftCosts;
+            else if (angle >= -minSharpAngle && angle < -minUTurnAngle)
+                return leftSharpCosts;
+
+            // Anything else that's too sharp is practically a u-turn.
+            return uTurnCosts;
+        }
         return 0;
     }
 
