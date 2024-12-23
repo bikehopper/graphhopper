@@ -83,6 +83,7 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
         if (inEdge == outEdge)
             return config.getUTurnCostsSeconds();
 
+//        System.out.println("calcTurnWeight: " + inEdge + "->" + viaNode + "->" + outEdge);
         // also need to handle restricted turns using TCS, but maybe later.
 
         if (orientationEnc != null) {
@@ -104,7 +105,7 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
 
     @Override
     public long calcTurnMillis(int inEdge, int viaNode, int outEdge) {
-        return 0;
+        return (long)(1000 * calcTurnWeight(inEdge, viaNode, outEdge));
     }
 
     @Override
