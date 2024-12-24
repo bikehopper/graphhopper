@@ -1,12 +1,12 @@
 package com.graphhopper.routing.util;
 
 public class TurnCostsConfig {
-    private double leftCostsSeconds = 45;
-    private double leftSharpCostsSeconds = 45;
-    private double rightCostsSeconds = 5;
-    private double rightSharpCostsSeconds = 15;
+    private double leftCostsSeconds = 8;
+    private double leftSharpCostsSeconds = 10;
+    private double rightCostsSeconds = 3;
+    private double rightSharpCostsSeconds = 5;
 
-    private double uTurnCostsSeconds = 60;
+    private double uTurnCostsSeconds = 20;
 
     private double minAngleDegrees = 25, minSharpAngleDegrees = 80, minUTurnAngleDegrees = 180;
 
