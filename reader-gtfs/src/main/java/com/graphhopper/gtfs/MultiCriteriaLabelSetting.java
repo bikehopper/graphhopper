@@ -17,6 +17,8 @@
  */
 package com.graphhopper.gtfs;
 
+import com.graphhopper.gtfs.GtfsStorage.EdgeType;
+import com.graphhopper.routing.weighting.Weighting;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
@@ -49,6 +51,7 @@ public class MultiCriteriaLabelSetting {
     private double betaStreetTime = 1.0;
     private long limitTripTime = Long.MAX_VALUE;
     private long limitStreetTime = Long.MAX_VALUE;
+    private Weighting weighting;
 
     public MultiCriteriaLabelSetting(GraphExplorer explorer, boolean reverse, boolean mindTransfers, boolean profileQuery, long maxProfileDuration, List<Label> solutions) {
         this.explorer = explorer;
@@ -57,7 +60,7 @@ public class MultiCriteriaLabelSetting {
         this.profileQuery = profileQuery;
         this.maxProfileDuration = maxProfileDuration;
         this.targetLabels = solutions;
-
+        this.weighting = this.explorer.getConnectingWeighting();
         queueComparator = new LabelComparator();
         fromHeap = new PriorityQueue<>(queueComparator);
         fromMap = new HashMap<>();
@@ -103,6 +106,16 @@ public class MultiCriteriaLabelSetting {
                 for (GraphExplorer.MultiModalEdge edge : explorer.exploreEdgesAround(label)) {
                     long nextTime;
                     double nextEdgeWeight = label.edgeWeight + edge.getWeight();
+                    if (label.edge != null && label.edge.getType() == EdgeType.HIGHWAY && edge.getType() == EdgeType.HIGHWAY) {
+                        int inEdge = label.edge.getId();
+                        int viaNode = label.edge.getAdjNode().streetNode;
+                        int outEdge = edge.getId();
+                        double turnWeight = weighting.calcTurnWeight(inEdge, viaNode, outEdge);
+//                        System.out.println("inEdge=" + inEdge + "-> outEdge=" + outEdge + ", turnWeight=" + turnWeight + ", currentWeight=" + nextEdgeWeight);
+//                        public double calcTurnWeight(int inEdge, int viaNode, int outEdge)
+                        // Add joined edge costs here.
+                        nextEdgeWeight += turnWeight * 1000;
+                    }
                     if (reverse) {
                         nextTime = label.currentTime - explorer.calcTravelTimeMillis(edge, label.currentTime);
                     } else {

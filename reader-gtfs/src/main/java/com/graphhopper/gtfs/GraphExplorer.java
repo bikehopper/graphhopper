@@ -71,6 +71,10 @@ public final class GraphExplorer {
         this.isBike = isBike;
     }
 
+    public Weighting getConnectingWeighting() {
+        return connectingWeighting;
+    }
+
     Iterable<MultiModalEdge> exploreEdgesAround(Label label) {
         return () -> {
             Iterator<MultiModalEdge> ptEdges = label.node.ptNode != -1 ? ptEdgeStream(label.node.ptNode, label.currentTime).iterator() : Collections.emptyIterator();
@@ -172,7 +176,10 @@ public final class GraphExplorer {
             public boolean tryAdvance(Consumer<? super MultiModalEdge> action) {
                 while (e.next()) {
                     if (reverse ? e.getReverse(accessEnc) : e.get(accessEnc)) {
-                        action.accept(new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(), (long) (connectingWeighting.calcEdgeMillis(e.detach(false), reverse)), connectingWeighting.calcEdgeWeight(e.detach(false), reverse), e.getDistance(), e.getGrade()));
+                        action.accept(new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(),
+                                connectingWeighting.calcEdgeMillis(e.detach(false), reverse),
+                                connectingWeighting.calcEdgeWeight(e.detach(false), reverse),
+                                e.getDistance(), e.getGrade()));
                         return true;
                     }
                 }
