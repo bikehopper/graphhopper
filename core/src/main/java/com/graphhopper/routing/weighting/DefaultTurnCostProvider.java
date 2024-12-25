@@ -83,11 +83,8 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
         if (inEdge == outEdge)
             return config.getUTurnCostsSeconds();
 
-//        System.out.println("calcTurnWeight: " + inEdge + "->" + viaNode + "->" + outEdge);
-        // also need to handle restricted turns using TCS, but maybe later.
-
         if (orientationEnc != null) {
-           double angle = calcChangeAngle(inEdge, viaNode, outEdge);
+            double angle = calcChangeAngle(inEdge, viaNode, outEdge);
             if (angle >= minAngle && angle < minSharpAngle)
                 return rightCosts;
             else if (angle >= minSharpAngle && angle <= minUTurnAngle)
@@ -114,15 +111,14 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
     }
 
     double calcChangeAngle(int inEdge, int viaNode, int outEdge) {
-        EdgeIteratorState edge1 = graph.getEdgeIteratorState(inEdge, viaNode);
-        EdgeIteratorState edge2 = graph.getEdgeIteratorState(outEdge, viaNode);
-        boolean inEdgeReverse = !graph.isAdjacentToNode(inEdge, viaNode);
-        boolean outEdgeReverse = !graph.isAdjacentToNode(outEdge, viaNode);
+        EdgeIteratorState edge1 = graph.getEdgeIteratorStateForKey(inEdge);
+        EdgeIteratorState edge2 = graph.getEdgeIteratorStateForKey(outEdge);
+//        System.out.println("edge1")
+        boolean inEdgeReverse = !graph.isAdjacentToNode(edge1.getOrigEdgeLast(), viaNode);
+        boolean outEdgeReverse = !graph.isAdjacentToNode(edge2.getOrigEdgeLast(), viaNode);
 
-        double prevAzimuth = orientationEnc.getDecimal(inEdgeReverse,
-                edge1.getFlags());
-        double azimuth = orientationEnc.getDecimal(outEdgeReverse,
-                edge2.getFlags());
+        double prevAzimuth = orientationEnc.getDecimal(inEdgeReverse, edge1.getFlags());
+        double azimuth = orientationEnc.getDecimal(outEdgeReverse, edge2.getFlags());
 
         azimuth += (azimuth >= 180 ? -180 : 180);
         double changeAngle = azimuth - prevAzimuth;
