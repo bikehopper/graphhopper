@@ -110,11 +110,7 @@ public class MultiCriteriaLabelSetting {
                         int inEdge = label.edge.getId();
                         int viaNode = label.edge.getAdjNode().streetNode;
                         int outEdge = edge.getId();
-                        double turnWeight = weighting.calcTurnWeight(inEdge, viaNode, outEdge);
-//                        System.out.println("inEdge=" + inEdge + "-> outEdge=" + outEdge + ", turnWeight=" + turnWeight + ", currentWeight=" + nextEdgeWeight);
-//                        public double calcTurnWeight(int inEdge, int viaNode, int outEdge)
-                        // Add joined edge costs here.
-                        nextEdgeWeight += turnWeight * 1000;
+                        nextEdgeWeight += 1000 * weighting.calcTurnWeight(inEdge, viaNode, outEdge);
                     }
                     if (reverse) {
                         nextTime = label.currentTime - explorer.calcTravelTimeMillis(edge, label.currentTime);
