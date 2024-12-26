@@ -205,7 +205,6 @@ public class EncodingManager implements EncodedValueLookup {
                         _addEdgeTagParser(new OSMCyclewayParser(), false);
                     if (!em.hasEncodedValue(Orientation.KEY)) {
                         _addEdgeTagParser(new OrientationCalculator(Orientation.create()), false);
-                        System.out.println("Adding orientation calculator.");
                     }
                 } else if (encoder instanceof FootFlagEncoder) {
                     if (!em.hasEncodedValue(RouteNetwork.key("foot")))
