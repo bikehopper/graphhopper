@@ -14,10 +14,30 @@ import com.graphhopper.util.FetchMode;
 import com.graphhopper.util.PointList;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class DefaultTurnCostProviderTest {
-    public DefaultTurnCostProvider turnCostProvider;
+
+    private DecimalEncodedValue orientationEnc;
+    private OrientationCalculator orientationCalculator;
+    private EncodingManager encodingManager;
+    private BaseGraph graph;
+    public TurnCostProvider turnCostProvider;
+
+    @BeforeEach
+    public void setup() {
+        orientationEnc = Orientation.create();
+        orientationCalculator = new OrientationCalculator(orientationEnc);
+
+        encodingManager = new EncodingManager.Builder().add(orientationEnc)
+                .build();
+        graph = new BaseGraph.Builder(encodingManager).withTurnCosts(true)
+                .create();
+
+        turnCostProvider = new DefaultTurnCostProvider(orientationEnc, graph,
+                new TurnCostsConfig());
+    }
 
     /**
      * Checks that DefaultTurnCostProvider.calcTurnWeight() returns the supplied
@@ -27,7 +47,8 @@ public class DefaultTurnCostProviderTest {
     public void testEqualEdgeUTurnCost() {
         DecimalEncodedValue orientation = Orientation.create();
         TurnCostsConfig config = new TurnCostsConfig();
-        turnCostProvider = new DefaultTurnCostProvider(orientation, null, config);
+        turnCostProvider = new DefaultTurnCostProvider(orientation, null,
+                config);
         assertEquals(config.getUTurnCostsSeconds(),
                 turnCostProvider.calcTurnWeight(1, 2, 1));
     }
@@ -37,35 +58,27 @@ public class DefaultTurnCostProviderTest {
      */
     @Test
     public void testStraightNoCost() {
-        DecimalEncodedValue orientation = Orientation.create();
-        OrientationCalculator calculator =
-                new OrientationCalculator(orientation);
-        EncodingManager em = new EncodingManager.Builder()
-                .add(orientation).build();
-        BaseGraph graph = new BaseGraph.Builder(em)
-                .withTurnCosts(true).create();
-
-        TurnCostProvider turnCostProvider =
-                new DefaultTurnCostProvider(orientation, graph,
-                        new TurnCostsConfig());
-
         // 0 - 1 - 2
         graph.getNodeAccess().setNode(0, 37.760843, -122.436103);
         graph.getNodeAccess().setNode(1, 37.760905, -122.435038);
         graph.getNodeAccess().setNode(2, 37.760975, -122.433937);
         List<Double> pts = new ArrayList<>();
-        EdgeIteratorState edge01 = handleWayTags(calculator, graph.edge(0, 1),
+        EdgeIteratorState edge01 = handleWayTags(orientationCalculator,
+                graph.edge(0, 1),
                 pts);
-        EdgeIteratorState edge02 = handleWayTags(calculator, graph.edge(1, 2),
+        EdgeIteratorState edge02 = handleWayTags(orientationCalculator,
+                graph.edge(1, 2),
                 pts);
 
         assertEquals(0, turnCostProvider.calcTurnWeight(edge01.getEdge(), 1,
                 edge02.getEdge()));
     }
 
-    EdgeIteratorState handleWayTags(OrientationCalculator calc, EdgeIteratorState edge, List<Double> rawPoints) {
-        if (rawPoints.size() % 2 != 0)
+    EdgeIteratorState handleWayTags(OrientationCalculator calc,
+            EdgeIteratorState edge, List<Double> rawPoints) {
+        if (rawPoints.size() % 2 != 0) {
             throw new IllegalArgumentException();
+        }
         if (!rawPoints.isEmpty()) {
             PointList pointList = new PointList();
             for (int i = 0; i < rawPoints.size(); i += 2) {
