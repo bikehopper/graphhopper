@@ -23,20 +23,24 @@ public class DefaultTurnCostProviderTest {
     private OrientationCalculator orientationCalculator;
     private EncodingManager encodingManager;
     private BaseGraph graph;
-    public TurnCostProvider turnCostProvider;
+    private TurnCostProvider turnCostProvider;
+    private TurnCostsConfig turnCostsConfig;
 
     @BeforeEach
     public void setup() {
-        orientationEnc = Orientation.create();
+        encodingManager = new EncodingManager.Builder().add(Orientation.create()).build();
+        orientationEnc = encodingManager.getDecimalEncodedValue(Orientation.KEY);
         orientationCalculator = new OrientationCalculator(orientationEnc);
 
-        encodingManager = new EncodingManager.Builder().add(orientationEnc)
-                .build();
+        // Left: 8, Sharp Left: 10
+        // Right: 3, Sharp Right: 5
+        // U-Turn: 20
+        turnCostsConfig = new TurnCostsConfig();
+
         graph = new BaseGraph.Builder(encodingManager).withTurnCosts(true)
                 .create();
 
-        turnCostProvider = new DefaultTurnCostProvider(orientationEnc, graph,
-                new TurnCostsConfig());
+        turnCostProvider = new DefaultTurnCostProvider(orientationEnc, graph, turnCostsConfig);
     }
 
     /**
@@ -74,6 +78,42 @@ public class DefaultTurnCostProviderTest {
                 edge02.getEdge()));
     }
 
+    @Test
+    public void testLeftTurnCost() {
+        //      2
+        //      |
+        // 0 -- 1
+        int viaNode = 1;
+        graph.getNodeAccess().setNode(0, 37.76083, -122.43613);
+        graph.getNodeAccess().setNode(viaNode, 37.7609, -122.43503);
+        graph.getNodeAccess().setNode(2, 37.7625, -122.43519);
+        List<Double> pts = new ArrayList<>();
+        EdgeIteratorState edge01 = handleWayTags(orientationCalculator, graph.edge(0, viaNode), pts);
+        EdgeIteratorState edge02 = handleWayTags(orientationCalculator, graph.edge(viaNode, 2), pts);
+
+        assertEquals(turnCostsConfig.getLeftCostsSeconds(),
+                turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode,
+                        edge02.getEdge()));
+    }
+
+    @Test
+    public void testRightTurnCost() {
+        // 0 -- 1
+        //      |
+        //      2
+        int viaNode = 1;
+        graph.getNodeAccess().setNode(0, 37.760843, -122.436103);
+        graph.getNodeAccess().setNode(viaNode, 37.760905, -122.435038);
+        graph.getNodeAccess().setNode(2, 37.759321, -122.434888);
+        List<Double> pts = new ArrayList<>();
+        EdgeIteratorState edge01 = handleWayTags(orientationCalculator, graph.edge(0, viaNode), pts);
+        EdgeIteratorState edge02 = handleWayTags(orientationCalculator, graph.edge(viaNode, 2), pts);
+
+        assertEquals(turnCostsConfig.getRightCostsSeconds(),
+                turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode,
+                        edge02.getEdge()));
+    }
+
     EdgeIteratorState handleWayTags(OrientationCalculator calc,
             EdgeIteratorState edge, List<Double> rawPoints) {
         if (rawPoints.size() % 2 != 0) {
@@ -88,7 +128,7 @@ public class DefaultTurnCostProviderTest {
         }
         ReaderWay way = new ReaderWay(1);
         way.setTag("point_list", edge.fetchWayGeometry(FetchMode.ALL));
-        calc.handleWayTags(edge.getFlags(), way, null);
+        edge.setFlags(calc.handleWayTags(edge.getFlags(), way, null));
         return edge;
     }
 }
