@@ -85,14 +85,16 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
 
         if (orientationEnc != null) {
             double angle = calcChangeAngle(inEdge, viaNode, outEdge);
-            if (angle >= minAngle && angle < minSharpAngle)
-                return rightCosts;
-            else if (angle >= minSharpAngle && angle <= minUTurnAngle)
-                return rightSharpCosts;
-            else if (angle <= -minAngle && angle > -minSharpAngle)
+            if (angle > -minAngle && angle < minAngle)
+                return 0;   // straight
+            else if (angle >= minAngle && angle < minSharpAngle)
                 return leftCosts;
-            else if (angle >= -minSharpAngle && angle < -minUTurnAngle)
+            else if (angle >= minSharpAngle && angle < minUTurnAngle)
                 return leftSharpCosts;
+            else if (angle <= -minAngle && angle > -minSharpAngle)
+                return rightCosts;
+            else if (angle <= -minSharpAngle && angle > -minUTurnAngle)
+                return rightSharpCosts;
 
             // Anything else that's too sharp is practically a u-turn.
             return uTurnCosts;
@@ -120,7 +122,12 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
         double prevAzimuth = orientationEnc.getDecimal(inEdgeReverse, edge1.getFlags());
         double azimuth = orientationEnc.getDecimal(outEdgeReverse, edge2.getFlags());
 
-        azimuth += (azimuth >= 180 ? -180 : 180);
+        // no angle of incidence.
+        if (prevAzimuth == azimuth) return 0;
+
+        if (azimuth >= 180) azimuth -= 180;
+        else azimuth += 180;
+
         double changeAngle = azimuth - prevAzimuth;
         if (changeAngle > 180) changeAngle -= 360;
         else if (changeAngle < -180) changeAngle += 360;
