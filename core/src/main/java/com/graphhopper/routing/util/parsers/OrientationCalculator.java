@@ -39,6 +39,6 @@ public class OrientationCalculator implements TagParser {
             );
             orientationEnc.setDecimal(true, edgeFlags, revAzimuth);
         }
-        return null;
+        return edgeFlags;
     }
 }
