@@ -8,7 +8,7 @@ public class TurnCostsConfig {
 
     private double uTurnCostsSeconds = 20;
 
-    private double minAngleDegrees = 25, minSharpAngleDegrees = 80, minUTurnAngleDegrees = 180;
+    private double minAngleDegrees = 25, minSharpAngleDegrees = 100, minUTurnAngleDegrees = 180;
 
     public double getLeftCostsSeconds() {
         return leftCostsSeconds;
