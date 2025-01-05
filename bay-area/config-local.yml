@@ -53,10 +53,11 @@ graphhopper:
       weighting: fastest
       use_ferries: false
       snap_preventions: footway
+      turn_costs: true
+      u_turn_costs: 60
     - name: foot
       vehicle: foot
       weighting: fastest
-      use_ferries: false
 
   #  - name: car_with_turn_costs
   #    vehicle: car
