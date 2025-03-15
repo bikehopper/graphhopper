@@ -29,8 +29,10 @@ import com.graphhopper.util.shapes.GHPoint3D;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.IntUnaryOperator;
 
 import static java.util.Collections.emptyMap;
@@ -71,6 +73,9 @@ class OSMNodeData {
     // yet and a value of -2 means there was an entry but it was removed again
     private final LongIntMap nodeTagIndicesByOsmNodeIds;
 
+    // stores a list of OSM Node Ids that will be split into segments later
+    private final Set<Long> splitOsmNodeIds;
+
     // stores node tags
     private final List<Map<String, Object>> nodeTags;
 
@@ -89,6 +94,7 @@ class OSMNodeData {
 
         nodeTagIndicesByOsmNodeIds = new GHLongIntBTree(200);
         nodeTags = new ArrayList<>();
+        splitOsmNodeIds = new HashSet<>();
     }
 
     public boolean is3D() {
@@ -249,6 +255,14 @@ class OSMNodeData {
         } else {
             throw new IllegalStateException("Cannot add tags twice, duplicate node OSM ID: " + node.getId());
         }
+    }
+
+    public void setSplit(ReaderNode node) {
+        splitOsmNodeIds.add(node.getId());
+    }
+
+    public boolean getSplit(long osmNodeId) {
+        return splitOsmNodeIds.contains(osmNodeId);
     }
 
     public Map<String, Object> getTags(long osmNodeId) {

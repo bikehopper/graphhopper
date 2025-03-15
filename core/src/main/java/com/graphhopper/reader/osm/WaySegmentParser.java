@@ -26,6 +26,7 @@ import com.graphhopper.reader.ReaderWay;
 import com.graphhopper.reader.dem.ElevationProvider;
 import com.graphhopper.storage.Directory;
 import com.graphhopper.storage.RAMDirectory;
+import com.graphhopper.util.EdgeIteratorState;
 import com.graphhopper.util.Helper;
 import com.graphhopper.util.PointAccess;
 import com.graphhopper.util.PointList;
@@ -40,8 +41,10 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.LongToIntFunction;
 import java.util.function.Predicate;
@@ -76,15 +79,17 @@ public class WaySegmentParser {
     private final Consumer<ReaderRelation> relationPreprocessor;
     private final RelationProcessor relationProcessor;
     private final EdgeHandler edgeHandler;
+    private final JunctionHandler junctionHandler;
     private final int workerThreads;
 
     private final OSMNodeData nodeData;
+    private final Map<Long, OSMJunction> junctions;
     private Date timestamp;
 
     private WaySegmentParser(PointAccess nodeAccess, Directory directory, ElevationProvider eleProvider,
                              Predicate<ReaderWay> wayFilter, Predicate<ReaderNode> splitNodeFilter, WayPreprocessor wayPreprocessor,
                              Consumer<ReaderRelation> relationPreprocessor, RelationProcessor relationProcessor,
-                             EdgeHandler edgeHandler, int workerThreads) {
+            EdgeHandler edgeHandler, JunctionHandler junctionHandler, int workerThreads) {
         this.eleProvider = eleProvider;
         this.wayFilter = wayFilter;
         this.splitNodeFilter = splitNodeFilter;
@@ -92,9 +97,11 @@ public class WaySegmentParser {
         this.relationPreprocessor = relationPreprocessor;
         this.relationProcessor = relationProcessor;
         this.edgeHandler = edgeHandler;
+        this.junctionHandler = junctionHandler;
         this.workerThreads = workerThreads;
 
         this.nodeData = new OSMNodeData(nodeAccess, directory);
+        this.junctions = new HashMap<>();
     }
 
     /**
@@ -119,12 +126,23 @@ public class WaySegmentParser {
         readOSM(osmFile, new Pass2Handler());
         LOGGER.info("pass2 - finished, took: {}", sw2.stop().getTimeString());
 
+        for (OSMJunction junction : junctions.values()) {
+            this.junctionHandler.handleJunction(junction, nodeData, this::getInternalNodeIdOfOSMNode);
+        }
+
         nodeData.release();
 
         LOGGER.info("Finished reading OSM file." +
                 " pass1: " + (int) sw1.getSeconds() + "s, " +
                 " pass2: " + (int) sw2.getSeconds() + "s, " +
                 " total: " + (int) (sw1.getSeconds() + sw2.getSeconds()) + "s");
+    }
+
+    public int getInternalNodeIdOfOSMNode(long nodeOsmId) {
+        int id = nodeData.getId(nodeOsmId);
+        if (isTowerNode(id))
+            return -id - 3;
+        return -1;
     }
 
     /**
@@ -224,14 +242,33 @@ public class WaySegmentParser {
 
             acceptedNodes++;
 
+            boolean keepTags = false;
             // we keep node tags for barrier nodes
             if (splitNodeFilter.test(node)) {
                 if (nodeType == JUNCTION_NODE) {
                     LOGGER.debug("OSM node {} at {},{} is a barrier node at a junction. The barrier will be ignored",
                             node.getId(), Helper.round(node.getLat(), 7), Helper.round(node.getLon(), 7));
                     ignoredSplitNodes++;
-                } else
-                    nodeData.setTags(node);
+                } else {
+                    keepTags = true;
+                    nodeData.setSplit(node);
+                }
+            }
+
+            // also keep node tags for traffic control nodes
+            if (node.hasTag("highway", "stop", "traffic_signals")) {
+                keepTags = true;
+            }
+
+            if (nodeType == JUNCTION_NODE) {
+                OSMJunction junction = new OSMJunction(
+                        new SegmentNode(node.getId(), -1));
+                junctions.put(node.getId(), junction);
+            }
+
+            if (keepTags) {
+                // this function must only be called once per node
+                nodeData.setTags(node);
             }
         }
 
@@ -256,6 +293,12 @@ public class WaySegmentParser {
             splitWayAtJunctionsAndEmptySections(segment, way);
         }
 
+        /**
+         * Take a full segment of a way, split it, and handle it.
+         * 
+         * @param fullSegment
+         * @param way
+         */
         private void splitWayAtJunctionsAndEmptySections(List<SegmentNode> fullSegment, ReaderWay way) {
             List<SegmentNode> segment = new ArrayList<>();
             for (SegmentNode node : fullSegment) {
@@ -284,6 +327,13 @@ public class WaySegmentParser {
                 splitLoopSegments(segment, way);
         }
 
+        /**
+         * Split a segment into multiple segments if it is a loop.
+         * Then, split the segments by nodes and handle it.
+         * 
+         * @param segment
+         * @param way
+         */
         private void splitLoopSegments(List<SegmentNode> segment, ReaderWay way) {
             if (segment.size() < 2)
                 throw new IllegalStateException("Segment size must be >= 2, but was: " + segment.size());
@@ -300,13 +350,20 @@ public class WaySegmentParser {
             }
         }
 
+        /**
+         * Split a segment into multiple segments if it contains nodes to split on.
+         * Then, handle the segments.
+         * 
+         * @param parentSegment
+         * @param way
+         */
         private void splitSegmentAtSplitNodes(List<SegmentNode> parentSegment, ReaderWay way) {
             List<SegmentNode> segment = new ArrayList<>();
             for (int i = 0; i < parentSegment.size(); i++) {
                 SegmentNode node = parentSegment.get(i);
                 Map<String, Object> nodeTags = nodeData.getTags(node.osmNodeId);
                 // so far we only consider node tags of split nodes, so if there are node tags we split the node
-                if (!nodeTags.isEmpty()) {
+                if (nodeData.getSplit(node.osmNodeId) && !nodeTags.isEmpty()) {
                     // this node is a barrier. we will copy it and add an extra edge
                     SegmentNode barrierFrom = node;
                     SegmentNode barrierTo = nodeData.addCopyOfNode(node);
@@ -338,10 +395,20 @@ public class WaySegmentParser {
                 handleSegment(segment, way, emptyMap());
         }
 
+        /**
+         * Process each segment by:
+         * - Creating an edge out of the segment's start, end, geometry, and tags
+         * - Adding the edge to junctions for later
+         * 
+         * @param segment
+         * @param way
+         * @param nodeTags
+         */
         void handleSegment(List<SegmentNode> segment, ReaderWay way, Map<String, Object> nodeTags) {
             final PointList pointList = new PointList(segment.size(), nodeData.is3D());
             int from = -1;
             int to = -1;
+            Map<Long, Integer> addToJunctions = new HashMap<>();
             for (int i = 0; i < segment.size(); i++) {
                 SegmentNode node = segment.get(i);
                 int id = node.id;
@@ -352,17 +419,30 @@ public class WaySegmentParser {
                     node.id = id;
                 }
 
-                if (i == 0)
+                if (i == 0) {
                     from = nodeData.idToTowerNode(id);
-                else if (i == segment.size() - 1)
+                    if (junctions.containsKey(node.osmNodeId)) {
+                        addToJunctions.put(node.osmNodeId, from);
+                    }
+                } else if (i == segment.size() - 1) {
                     to = nodeData.idToTowerNode(id);
+                    if (junctions.containsKey(node.osmNodeId)) {
+                        addToJunctions.put(node.osmNodeId, to);
+                    }
+                }
                 else if (isTowerNode(id))
                     throw new IllegalStateException("Tower nodes should only appear at the end of segments, way: " + way.getId());
                 nodeData.addCoordinatesToPointList(id, pointList);
+
             }
             if (from < 0 || to < 0)
                 throw new IllegalStateException("The first and last nodes of a segment must be tower nodes, way: " + way.getId());
-            edgeHandler.handleEdge(from, to, pointList, way, nodeTags);
+            EdgeIteratorState edge = edgeHandler.handleEdge(from, to, pointList, way, nodeTags);
+            for (Entry<Long, Integer> e : addToJunctions.entrySet()) {
+                OSMJunction junction = junctions.get(e.getKey());
+                junction.addSegment(way, pointList.clone(false), edge.getEdge(), segment);
+                junction.setJunctionNodeId(e.getValue());
+            }
         }
 
         @Override
@@ -419,7 +499,12 @@ public class WaySegmentParser {
         private RelationProcessor relationProcessor = (relation, map) -> {
         };
         private EdgeHandler edgeHandler = (from, to, pointList, way, nodeTags) ->
-                System.out.println("edge " + from + "->" + to + " (" + pointList.size() + " points)");
+        {
+            System.out.println("edge " + from + "->" + to + " (" + pointList.size() + " points)");
+            return null;
+        };
+        private JunctionHandler junctionHandler = (junction, nodeData, func) -> System.out
+                .println("junction " + junction);
         private int workerThreads = 2;
 
         /**
@@ -495,6 +580,15 @@ public class WaySegmentParser {
         }
 
         /**
+         * 
+         * @param junctionHandler callback function that is called for each junction
+         */
+        public Builder setJunctionHandler(JunctionHandler junctionHandler) {
+            this.junctionHandler = junctionHandler;
+            return this;
+        }
+
+        /**
          * @param workerThreads the number of threads used for the low level reading of the OSM file
          */
         public Builder setWorkerThreads(int workerThreads) {
@@ -505,7 +599,7 @@ public class WaySegmentParser {
         public WaySegmentParser build() {
             return new WaySegmentParser(
                     nodeAccess, directory, elevationProvider, wayFilter, splitNodeFilter, wayPreprocessor, relationPreprocessor, relationProcessor,
-                    edgeHandler, workerThreads
+                    edgeHandler, junctionHandler, workerThreads
             );
         }
     }
@@ -547,7 +641,12 @@ public class WaySegmentParser {
     }
 
     public interface EdgeHandler {
-        void handleEdge(int from, int to, PointList pointList, ReaderWay way, Map<String, Object> nodeTags);
+        EdgeIteratorState handleEdge(int from, int to, PointList pointList, ReaderWay way,
+                Map<String, Object> nodeTags);
+    }
+
+    public interface JunctionHandler {
+        void handleJunction(OSMJunction junction, OSMNodeData nodeData, LongToIntFunction getNodeIdForOSMNodeId);
     }
 
     public interface RelationProcessor {

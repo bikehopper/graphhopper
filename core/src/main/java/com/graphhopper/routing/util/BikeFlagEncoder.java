@@ -38,7 +38,7 @@ public class BikeFlagEncoder extends BikeCommonFlagEncoder {
         this(properties.getString("name", "bike"),
                 properties.getInt("speed_bits", 4),
                 properties.getInt("speed_factor", 2),
-                properties.getBool("turn_costs", false) ? 1 : 0,
+                properties.getBool("turn_costs", false) ? 1000 : 0,
                 properties.getBool("speed_two_directions", false),
                 properties.getBool("use_ferries", true));
 
@@ -55,6 +55,7 @@ public class BikeFlagEncoder extends BikeCommonFlagEncoder {
             boolean useFerries) {
         super(name, speedBits, speedFactor, maxTurnCosts, speedTwoDirections, useFerries);
         addPushingSection("footway");
+        addPushingSection("steps");
         addPushingSection("platform");
 
         avoidHighwayTags.add("trunk");

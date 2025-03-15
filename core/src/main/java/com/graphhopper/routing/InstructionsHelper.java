@@ -24,7 +24,7 @@ import com.graphhopper.util.shapes.GHPoint;
 /**
  * Simple helper class used during the instruction generation
  */
-class InstructionsHelper {
+public class InstructionsHelper {
 
     static double calculateOrientationDelta(double prevLatitude, double prevLongitude, double latitude, double longitude, double prevOrientation) {
         double orientation = AngleCalc.ANGLE_CALC.calcOrientation(prevLatitude, prevLongitude, latitude, longitude, false);
@@ -32,7 +32,8 @@ class InstructionsHelper {
         return orientation - prevOrientation;
     }
 
-    static int calculateSign(double prevLatitude, double prevLongitude, double latitude, double longitude, double prevOrientation) {
+    public static int calculateSign(double prevLatitude, double prevLongitude, double latitude, double longitude,
+            double prevOrientation) {
         double delta = calculateOrientationDelta(prevLatitude, prevLongitude, latitude, longitude, prevOrientation);
         double absDelta = Math.abs(delta);
 
@@ -68,7 +69,8 @@ class InstructionsHelper {
         return name1.equals(name2);
     }
 
-    static GHPoint getPointForOrientationCalculation(EdgeIteratorState edgeIteratorState, NodeAccess nodeAccess) {
+    public static GHPoint getPointForOrientationCalculation(EdgeIteratorState edgeIteratorState,
+            NodeAccess nodeAccess) {
         double tmpLat;
         double tmpLon;
         PointList tmpWayGeo = edgeIteratorState.fetchWayGeometry(FetchMode.ALL);
