@@ -70,12 +70,12 @@ public class DefaultTurnCostProviderTest {
         EdgeIteratorState edge01 = handleWayTags(orientationCalculator,
                 graph.edge(0, 1),
                 pts);
-        EdgeIteratorState edge02 = handleWayTags(orientationCalculator,
+        EdgeIteratorState edge12 = handleWayTags(orientationCalculator,
                 graph.edge(1, 2),
                 pts);
 
         assertEquals(0, turnCostProvider.calcTurnWeight(edge01.getEdge(), 1,
-                edge02.getEdge()));
+                edge12.getEdge()));
     }
 
     @Test
@@ -89,11 +89,11 @@ public class DefaultTurnCostProviderTest {
         graph.getNodeAccess().setNode(2, 37.7625, -122.43519);
         List<Double> pts = new ArrayList<>();
         EdgeIteratorState edge01 = handleWayTags(orientationCalculator, graph.edge(0, viaNode), pts);
-        EdgeIteratorState edge02 = handleWayTags(orientationCalculator, graph.edge(viaNode, 2), pts);
+        EdgeIteratorState edge12 = handleWayTags(orientationCalculator, graph.edge(viaNode, 2), pts);
 
         assertEquals(turnCostsConfig.getLeftCostsSeconds(),
                 turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode,
-                        edge02.getEdge()));
+                        edge12.getEdge()));
     }
 
     @Test
@@ -107,11 +107,11 @@ public class DefaultTurnCostProviderTest {
         graph.getNodeAccess().setNode(2, 37.759321, -122.434888);
         List<Double> pts = new ArrayList<>();
         EdgeIteratorState edge01 = handleWayTags(orientationCalculator, graph.edge(0, viaNode), pts);
-        EdgeIteratorState edge02 = handleWayTags(orientationCalculator, graph.edge(viaNode, 2), pts);
+        EdgeIteratorState edge12 = handleWayTags(orientationCalculator, graph.edge(viaNode, 2), pts);
 
         assertEquals(turnCostsConfig.getRightCostsSeconds(),
                 turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode,
-                        edge02.getEdge()));
+                        edge12.getEdge()));
     }
 
     EdgeIteratorState handleWayTags(OrientationCalculator calc,
