@@ -114,6 +114,53 @@ public class DefaultTurnCostProviderTest {
                         edge12.getEdge()));
     }
 
+    @Test
+    public void testSharpLeftTurnCost() {
+        //    2
+        //     \
+        // 0 -- 1
+        int sourceNode = 0, viaNode = 1, targetNode = 2;
+        graph.getNodeAccess().setNode(sourceNode, 37.76262, -122.43295);
+        graph.getNodeAccess().setNode(viaNode, 37.7641, -122.43313);
+        graph.getNodeAccess().setNode(targetNode, 37.76264, -122.43516);
+        List<Double> pts = new ArrayList<>();
+        EdgeIteratorState edge01 = handleWayTags(orientationCalculator, graph.edge(0, 1), pts);
+        EdgeIteratorState edge12 = handleWayTags(orientationCalculator, graph.edge(1, 2), pts);
+
+        assertEquals(
+                turnCostsConfig.getLeftSharpCostsSeconds(),
+                turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode, edge12.getEdge()));
+    }
+
+    @Test
+    public void testSharpRightTurnCost() {
+        // 0 -- 1
+        //     /
+        //    2
+        int sourceNode = 0, viaNode = 1, targetNode = 2;
+        graph.getNodeAccess().setNode(sourceNode, 37.761, -122.44431);
+        graph.getNodeAccess().setNode(viaNode, 37.76056, -122.44437);
+        graph.getNodeAccess().setNode(targetNode, 37.7612, -122.444627);
+        List<Double> pts = new ArrayList<>();
+        EdgeIteratorState edge01 = handleWayTags(orientationCalculator, graph.edge(0, 1), pts);
+        EdgeIteratorState edge12 = handleWayTags(orientationCalculator, graph.edge(1, 2), pts);
+
+        assertEquals(
+                turnCostsConfig.getRightSharpCostsSeconds(),
+                turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode, edge12.getEdge()));
+    }
+
+    /**
+     * Processes way tags using an OrientationCalculator to determine the geometry and flags
+     * for a given edge. Converts raw geographical points into a PointList and sets it as the
+     * edge's geometry. Updates the edge's flags based on the provided orientation calculator.
+     *
+     * @param calc the OrientationCalculator used to process way tags
+     * @param edge the edge whose geometry and flags are to be updated
+     * @param rawPoints a list of raw geographical points represented as [lat, lon] pairs
+     * @return the updated EdgeIteratorState with modified geometry and flags
+     * @throws IllegalArgumentException if rawPoints size is not even
+     */
     EdgeIteratorState handleWayTags(OrientationCalculator calc,
             EdgeIteratorState edge, List<Double> rawPoints) {
         if (rawPoints.size() % 2 != 0) {
