@@ -113,11 +113,11 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
     }
 
     double calcChangeAngle(int inEdge, int viaNode, int outEdge) {
-        EdgeIteratorState edge1 = graph.getEdgeIteratorStateForKey(inEdge);
-        EdgeIteratorState edge2 = graph.getEdgeIteratorStateForKey(outEdge);
-//        System.out.println("edge1")
-        boolean inEdgeReverse = !graph.isAdjacentToNode(edge1.getOrigEdgeLast(), viaNode);
-        boolean outEdgeReverse = !graph.isAdjacentToNode(edge2.getOrigEdgeLast(), viaNode);
+        EdgeIteratorState edge1 = graph.getEdgeIteratorState(inEdge, viaNode);
+        EdgeIteratorState edge2 = graph.getEdgeIteratorState(outEdge, viaNode);
+
+        boolean inEdgeReverse = !graph.isAdjacentToNode(inEdge, viaNode);
+        boolean outEdgeReverse = !graph.isAdjacentToNode(outEdge, viaNode);
 
         double prevAzimuth = orientationEnc.getDecimal(inEdgeReverse, edge1.getFlags());
         double azimuth = orientationEnc.getDecimal(outEdgeReverse, edge2.getFlags());
@@ -125,12 +125,9 @@ public class DefaultTurnCostProvider implements TurnCostProvider {
         // no angle of incidence.
         if (prevAzimuth == azimuth) return 0;
 
-        if (azimuth >= 180) azimuth -= 180;
-        else azimuth += 180;
-
-        double changeAngle = azimuth - prevAzimuth;
-        if (changeAngle > 180) changeAngle -= 360;
-        else if (changeAngle < -180) changeAngle += 360;
-        return changeAngle;
+        double angle = prevAzimuth - azimuth;
+        if (angle > 180) angle -= 360;
+        else if (angle < -180) angle += 360;
+        return angle;
     }
 }
