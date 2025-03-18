@@ -63,19 +63,19 @@ public class DefaultTurnCostProviderTest {
     @Test
     public void testStraightNoCost() {
         // 0 - 1 - 2
-        graph.getNodeAccess().setNode(0, 37.760843, -122.436103);
-        graph.getNodeAccess().setNode(1, 37.760905, -122.435038);
-        graph.getNodeAccess().setNode(2, 37.760975, -122.433937);
+        int sourceNode = 0, viaNode = 1, targetNode = 2;
+        graph.getNodeAccess().setNode(sourceNode, 37.760843, -122.436103);
+        graph.getNodeAccess().setNode(viaNode, 37.760905, -122.435038);
+        graph.getNodeAccess().setNode(targetNode, 37.760975, -122.433937);
         List<Double> pts = new ArrayList<>();
         EdgeIteratorState edge01 = handleWayTags(orientationCalculator,
-                graph.edge(0, 1),
-                pts);
+                graph.edge(sourceNode, viaNode), pts);
         EdgeIteratorState edge12 = handleWayTags(orientationCalculator,
-                graph.edge(1, 2),
-                pts);
+                graph.edge(viaNode, targetNode), pts);
 
-        assertEquals(0, turnCostProvider.calcTurnWeight(edge01.getEdge(), 1,
-                edge12.getEdge()));
+        assertEquals(0,
+                turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode,
+                        edge12.getEdge()));
     }
 
     @Test
@@ -83,13 +83,15 @@ public class DefaultTurnCostProviderTest {
         //      2
         //      |
         // 0 -- 1
-        int viaNode = 1;
-        graph.getNodeAccess().setNode(0, 37.76083, -122.43613);
+        int sourceNode = 0, viaNode = 1, targetNode = 2;
+        graph.getNodeAccess().setNode(sourceNode, 37.76083, -122.43613);
         graph.getNodeAccess().setNode(viaNode, 37.7609, -122.43503);
-        graph.getNodeAccess().setNode(2, 37.7625, -122.43519);
+        graph.getNodeAccess().setNode(targetNode, 37.7625, -122.43519);
         List<Double> pts = new ArrayList<>();
-        EdgeIteratorState edge01 = handleWayTags(orientationCalculator, graph.edge(0, viaNode), pts);
-        EdgeIteratorState edge12 = handleWayTags(orientationCalculator, graph.edge(viaNode, 2), pts);
+        EdgeIteratorState edge01 = handleWayTags(orientationCalculator,
+                graph.edge(sourceNode, viaNode), pts);
+        EdgeIteratorState edge12 = handleWayTags(orientationCalculator,
+                graph.edge(viaNode, targetNode), pts);
 
         assertEquals(turnCostsConfig.getLeftCostsSeconds(),
                 turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode,
@@ -101,13 +103,15 @@ public class DefaultTurnCostProviderTest {
         // 0 -- 1
         //      |
         //      2
-        int viaNode = 1;
-        graph.getNodeAccess().setNode(0, 37.760843, -122.436103);
+        int sourceNode = 0, viaNode = 1, targetNode = 2;
+        graph.getNodeAccess().setNode(sourceNode, 37.760843, -122.436103);
         graph.getNodeAccess().setNode(viaNode, 37.760905, -122.435038);
-        graph.getNodeAccess().setNode(2, 37.759321, -122.434888);
+        graph.getNodeAccess().setNode(targetNode, 37.759321, -122.434888);
         List<Double> pts = new ArrayList<>();
-        EdgeIteratorState edge01 = handleWayTags(orientationCalculator, graph.edge(0, viaNode), pts);
-        EdgeIteratorState edge12 = handleWayTags(orientationCalculator, graph.edge(viaNode, 2), pts);
+        EdgeIteratorState edge01 = handleWayTags(orientationCalculator,
+                graph.edge(sourceNode, viaNode), pts);
+        EdgeIteratorState edge12 = handleWayTags(orientationCalculator,
+                graph.edge(viaNode, targetNode), pts);
 
         assertEquals(turnCostsConfig.getRightCostsSeconds(),
                 turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode,
@@ -124,12 +128,15 @@ public class DefaultTurnCostProviderTest {
         graph.getNodeAccess().setNode(viaNode, 37.7641, -122.43313);
         graph.getNodeAccess().setNode(targetNode, 37.76264, -122.43516);
         List<Double> pts = new ArrayList<>();
-        EdgeIteratorState edge01 = handleWayTags(orientationCalculator, graph.edge(0, 1), pts);
-        EdgeIteratorState edge12 = handleWayTags(orientationCalculator, graph.edge(1, 2), pts);
+        EdgeIteratorState edge01 = handleWayTags(orientationCalculator,
+                graph.edge(sourceNode, viaNode), pts);
+        EdgeIteratorState edge12 = handleWayTags(orientationCalculator,
+                graph.edge(viaNode, targetNode), pts);
 
         assertEquals(
                 turnCostsConfig.getLeftSharpCostsSeconds(),
-                turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode, edge12.getEdge()));
+                turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode,
+                        edge12.getEdge()));
     }
 
     @Test
@@ -142,12 +149,15 @@ public class DefaultTurnCostProviderTest {
         graph.getNodeAccess().setNode(viaNode, 37.76056, -122.44437);
         graph.getNodeAccess().setNode(targetNode, 37.7612, -122.444627);
         List<Double> pts = new ArrayList<>();
-        EdgeIteratorState edge01 = handleWayTags(orientationCalculator, graph.edge(0, 1), pts);
-        EdgeIteratorState edge12 = handleWayTags(orientationCalculator, graph.edge(1, 2), pts);
+        EdgeIteratorState edge01 = handleWayTags(orientationCalculator,
+                graph.edge(sourceNode, viaNode), pts);
+        EdgeIteratorState edge12 = handleWayTags(orientationCalculator,
+                graph.edge(viaNode, targetNode), pts);
 
         assertEquals(
                 turnCostsConfig.getRightSharpCostsSeconds(),
-                turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode, edge12.getEdge()));
+                turnCostProvider.calcTurnWeight(edge01.getEdge(), viaNode,
+                        edge12.getEdge()));
     }
 
     /**
@@ -163,14 +173,12 @@ public class DefaultTurnCostProviderTest {
      */
     EdgeIteratorState handleWayTags(OrientationCalculator calc,
             EdgeIteratorState edge, List<Double> rawPoints) {
-        if (rawPoints.size() % 2 != 0) {
+        if (rawPoints.size() % 2 != 0)
             throw new IllegalArgumentException();
-        }
         if (!rawPoints.isEmpty()) {
             PointList pointList = new PointList();
-            for (int i = 0; i < rawPoints.size(); i += 2) {
+            for (int i = 0; i < rawPoints.size(); i += 2)
                 pointList.add(rawPoints.get(0), rawPoints.get(1));
-            }
             edge.setWayGeometry(pointList);
         }
         ReaderWay way = new ReaderWay(1);
