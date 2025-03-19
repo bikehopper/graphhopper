@@ -19,6 +19,7 @@ package com.graphhopper.gtfs;
 
 import com.graphhopper.gtfs.GtfsStorage.EdgeType;
 import com.graphhopper.routing.weighting.Weighting;
+import com.graphhopper.util.EdgeIteratorState;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
@@ -51,7 +52,6 @@ public class MultiCriteriaLabelSetting {
     private double betaStreetTime = 1.0;
     private long limitTripTime = Long.MAX_VALUE;
     private long limitStreetTime = Long.MAX_VALUE;
-    private Weighting weighting;
 
     public MultiCriteriaLabelSetting(GraphExplorer explorer, boolean reverse, boolean mindTransfers, boolean profileQuery, long maxProfileDuration, List<Label> solutions) {
         this.explorer = explorer;
@@ -60,7 +60,7 @@ public class MultiCriteriaLabelSetting {
         this.profileQuery = profileQuery;
         this.maxProfileDuration = maxProfileDuration;
         this.targetLabels = solutions;
-        this.weighting = this.explorer.getConnectingWeighting();
+
         queueComparator = new LabelComparator();
         fromHeap = new PriorityQueue<>(queueComparator);
         fromMap = new HashMap<>();
@@ -96,6 +96,8 @@ public class MultiCriteriaLabelSetting {
 
         @Override
         public boolean tryAdvance(Consumer<? super Label> action) {
+            boolean hasMapping = explorer.ptGraph.hasMultiModalEdgeMapping();
+            Weighting weighting = explorer.getConnectingWeighting();
             while (!fromHeap.isEmpty() && fromHeap.peek().deleted)
                 fromHeap.poll();
             if (fromHeap.isEmpty()) {
@@ -106,11 +108,14 @@ public class MultiCriteriaLabelSetting {
                 for (GraphExplorer.MultiModalEdge edge : explorer.exploreEdgesAround(label)) {
                     long nextTime;
                     double nextEdgeWeight = label.edgeWeight + edge.getWeight();
-                    if (label.edge != null && label.edge.getType() == EdgeType.HIGHWAY && edge.getType() == EdgeType.HIGHWAY) {
-                        int inEdge = label.edge.getId();
-                        int viaNode = label.edge.getAdjNode().streetNode;
-                        int outEdge = edge.getId();
-                        nextEdgeWeight += 1000 * weighting.calcTurnWeight(inEdge, viaNode, outEdge);
+                    if (hasMapping && label.edge != null && edge.getType() == EdgeType.HIGHWAY && label.edge.getType() == EdgeType.HIGHWAY) {
+                        EdgeVertices vertices1 = new EdgeVertices(label.edge.getBaseNode(), label.edge.getAdjNode().streetNode);
+                        EdgeVertices vertices2 = new EdgeVertices(edge.getBaseNode(), edge.getAdjNode().streetNode);
+                        System.out.println(vertices1.getBaseNode() + " -> " + vertices1.getAdjNode());
+                        System.out.println(vertices2.getBaseNode() + " -> " + vertices2.getAdjNode());
+                        EdgeIteratorState edge1 = explorer.ptGraph.getEdge(vertices1);
+                        EdgeIteratorState edge2 = explorer.ptGraph.getEdge(vertices2);
+                        nextEdgeWeight += 1000 * weighting.calcTurnWeight(edge1.getEdge(), edge1.getAdjNode(), edge2.getEdge());
                     }
                     if (reverse) {
                         nextTime = label.currentTime - explorer.calcTravelTimeMillis(edge, label.currentTime);

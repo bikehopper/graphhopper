@@ -28,11 +28,15 @@ import com.graphhopper.storage.Graph;
 import com.graphhopper.util.EdgeExplorer;
 import com.graphhopper.util.EdgeIterator;
 import com.graphhopper.util.EdgeIteratorState;
-
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Spliterators;
 import java.util.function.Consumer;
 
 public final class GraphExplorer {
@@ -49,8 +53,10 @@ public final class GraphExplorer {
     private final boolean ignoreValidities;
     private final boolean ignoreBikesAllowed;
     private final int blockedRouteTypes;
-    private final PtGraph ptGraph;
+    final PtGraph ptGraph;
     private final Graph graph;
+
+    private HashMap<EdgeVertices, EdgeIteratorState> edges = new HashMap<>();
 
     public GraphExplorer(Graph graph, PtGraph ptGraph, Weighting connectingWeighting, GtfsStorage gtfsStorage, RealtimeFeed realtimeFeed, boolean reverse, boolean connectOnly, boolean ptOnly, boolean isBike, boolean ignoreValidities, int blockedRouteTypes) {
         this.graph = graph;
@@ -71,16 +77,28 @@ public final class GraphExplorer {
         this.isBike = isBike;
     }
 
-    public Weighting getConnectingWeighting() {
-        return connectingWeighting;
-    }
-
     Iterable<MultiModalEdge> exploreEdgesAround(Label label) {
         return () -> {
             Iterator<MultiModalEdge> ptEdges = label.node.ptNode != -1 ? ptEdgeStream(label.node.ptNode, label.currentTime).iterator() : Collections.emptyIterator();
             Iterator<MultiModalEdge> streetEdges = label.node.streetNode != -1 ? streetEdgeStream(label.node.streetNode).iterator() : Collections.emptyIterator();
             return Iterators.concat(ptEdges, streetEdges);
         };
+    }
+
+    void Add(MultiModalEdge edge) {
+        EdgeIteratorState e = graph.getEdgeIteratorState(edge.edge, edge.adjNode);
+        edges.put(new EdgeVertices(edge.baseNode, edge.adjNode), e);
+        edges.put(new EdgeVertices(edge.adjNode, edge.baseNode), e.detach(true));
+    }
+
+    int getSize() {
+        return edges.size();
+    }
+
+    HashMap<EdgeVertices, EdgeIteratorState> getEdges() { return edges; }
+
+    public Weighting getConnectingWeighting() {
+        return connectingWeighting;
     }
 
     private Iterable<PtGraph.PtEdge> realtimeEdgesAround(int node) {
@@ -176,10 +194,13 @@ public final class GraphExplorer {
             public boolean tryAdvance(Consumer<? super MultiModalEdge> action) {
                 while (e.next()) {
                     if (reverse ? e.getReverse(accessEnc) : e.get(accessEnc)) {
-                        action.accept(new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(),
-                                connectingWeighting.calcEdgeMillis(e.detach(false), reverse),
-                                connectingWeighting.calcEdgeWeight(e.detach(false), reverse),
-                                e.getDistance(), e.getGrade()));
+                        MultiModalEdge multiModalEdge =
+                                new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(),
+                                        connectingWeighting.calcEdgeMillis(e.detach(false), reverse),
+                                        connectingWeighting.calcEdgeWeight(e.detach(false), reverse),
+                                        e.getDistance(), e.getGrade());
+                        Add(multiModalEdge);
+                        action.accept(multiModalEdge);
                         return true;
                     }
                 }
@@ -309,6 +330,10 @@ public final class GraphExplorer {
 
         public int getId() {
             return ptEdge != null ? ptEdge.getId() : edge;
+        }
+
+        public int getBaseNode() {
+            return ptEdge != null ? ptEdge.getBaseNode() : baseNode;
         }
 
         public Label.NodeId getAdjNode() {
