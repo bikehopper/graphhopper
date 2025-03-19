@@ -673,7 +673,7 @@ public class BaseGraph implements Graph, Closeable {
          */
         final boolean init(int edgeId, int expectedAdjNode) {
             if (edgeId < 0 || edgeId >= store.getEdges())
-                throw new IllegalArgumentException("edge: " + edgeId + " out of bounds: [0," + store.getEdges() + "[");
+                throw new IllegalArgumentException("edge: " + edgeId + " out of bounds: [0," + store.getEdges() + "]");
             this.edgeId = edgeId;
             edgePointer = store.toEdgePointer(edgeId);
             baseNode = store.getNodeA(edgePointer);

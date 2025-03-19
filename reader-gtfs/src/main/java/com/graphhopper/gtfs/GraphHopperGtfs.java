@@ -145,6 +145,8 @@ public class GraphHopperGtfs extends GraphHopper {
                 }
             }
         });
+        System.out.println("Added " + graphExplorer.getSize() + " MMEs to map.");
+        ptGraph.setMultiModalEdges(graphExplorer.getEdges());
     }
 
     private void insertInterpolatedTransfer(Label label, GtfsStorage.PlatformDescriptor toPlatformDescriptor, HashMap<String, GtfsReader> readers) {

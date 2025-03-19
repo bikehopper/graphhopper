@@ -19,10 +19,12 @@
 package com.graphhopper.gtfs;
 
 import com.google.transit.realtime.GtfsRealtime;
+import com.graphhopper.gtfs.GraphExplorer.MultiModalEdge;
 import com.graphhopper.storage.DataAccess;
 import com.graphhopper.storage.Directory;
 import com.graphhopper.util.EdgeIterator;
 
+import com.graphhopper.util.EdgeIteratorState;
 import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
@@ -46,6 +48,8 @@ public class PtGraph implements GtfsReader.PtGraphOut {
     private final DataAccess attrs;
     private final static GtfsStorage.EdgeType[] edgeTypeValues = GtfsStorage.EdgeType.values();
 
+    private HashMap<EdgeVertices, EdgeIteratorState> multiModalEdges;
+
     public PtGraph(Directory dir, int firstNode) {
         this.dir = dir;
         nextNode = firstNode;
@@ -62,6 +66,19 @@ public class PtGraph implements GtfsReader.PtGraphOut {
         E_LINKB = 12;
         E_ATTRS = 16;
         edgeEntryBytes = E_ATTRS + 8;
+    }
+
+    public void setMultiModalEdges(HashMap<EdgeVertices, EdgeIteratorState> multiModalEdges) {
+        this.multiModalEdges = multiModalEdges;
+    }
+
+    public boolean hasMultiModalEdgeMapping() {
+        return multiModalEdges != null;
+    }
+
+    public EdgeIteratorState getEdge(EdgeVertices vertices) {
+        System.out.println("Number of MMEs: " + multiModalEdges.size());
+        return multiModalEdges.get(vertices);
     }
 
     public void create(long initSize) {
