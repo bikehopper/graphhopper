@@ -24,5 +24,5 @@ then
     nvm install 22
     nvm use 22
 fi
-npx --yes @bikehopper/data-mirror -o /source-data # download data
+npx --yes @bikehopper/data-mirror # download data
 mvn clean install -DskipTests # install dependencies
