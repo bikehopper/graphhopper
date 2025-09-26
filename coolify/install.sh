@@ -1,7 +1,21 @@
 #!/bin/sh
-node_version=$(node -v | grep -Eo '[0-9]+' | head -1)
+check_node() {
+    if which node > /dev/null
+    then
+        node_version=$(node -v | grep -Eo '[0-9]+' | head -1)
+        if [ $node_version -eq 22 ]
+        then
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+check_node
+has_node=$?
 # detect and install node version if necessary
-if [ $node_version -ne 22 ]
+if [ "$has_node" -eq "0" ] 
 then
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
     export NVM_DIR="$HOME/.nvm"
