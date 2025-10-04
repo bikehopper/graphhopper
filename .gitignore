@@ -45,3 +45,4 @@ local.properties
 /graph-cache
 /data
 package-lock.json
+.vscode/
