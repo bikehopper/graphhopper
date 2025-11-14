@@ -146,9 +146,16 @@ public interface EdgeIteratorState {
      */
     int getGrade();
 
+    /**
+     * @return whether or not the edge is a ferry edge
+     */
+    boolean isFerry();
+
     EdgeIteratorState setDistance(double dist);
 
     EdgeIteratorState setGrade(int grade);
+
+    EdgeIteratorState setIsFerry(boolean isFerry);
 
     /**
      * Returns edge properties stored in direction of the raw database layout. So do not use it directly, instead

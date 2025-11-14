@@ -753,6 +753,17 @@ public class BaseGraph implements Graph, Closeable {
         }
 
         @Override
+        public boolean isFerry() {
+            return store.isFerry(edgePointer);
+        }
+
+        @Override
+        public EdgeIteratorState setIsFerry(boolean isFerry) {
+            store.setIsFerry(edgePointer, isFerry);
+            return this;
+        }
+
+        @Override
         public IntsRef getFlags() {
             if (!freshFlags) {
                 store.readFlags(edgePointer, edgeFlags);

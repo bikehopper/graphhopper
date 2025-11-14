@@ -38,6 +38,7 @@ public class VirtualEdgeIteratorState implements EdgeIteratorState {
     private final int originalEdgeKey;
     private double distance;
     private int grade;
+    private boolean isFerry;
     private IntsRef edgeFlags;
     private String name;
     // true if edge should be avoided as start/stop
@@ -370,6 +371,17 @@ public class VirtualEdgeIteratorState implements EdgeIteratorState {
     @Override
     public EdgeIteratorState setGrade(int grade) {
         this.grade = grade;
+        return this;
+    }
+
+    @Override
+    public boolean isFerry() {
+        return this.isFerry;
+    }
+
+    @Override
+    public EdgeIteratorState setIsFerry(boolean isFerry) {
+        this.isFerry = isFerry;
         return this;
     }
 }
