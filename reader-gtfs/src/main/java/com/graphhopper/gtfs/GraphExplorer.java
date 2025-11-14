@@ -166,13 +166,16 @@ public final class GraphExplorer {
 
     private Iterable<MultiModalEdge> streetEdgeStream(int streetNode) {
         return () -> Spliterators.iterator(new Spliterators.AbstractSpliterator<MultiModalEdge>(0, 0) {
-            final EdgeIterator e = edgeExplorer.setBaseNode(streetNode);
+            final EdgeIterator edgeIterator = edgeExplorer.setBaseNode(streetNode);
 
             @Override
             public boolean tryAdvance(Consumer<? super MultiModalEdge> action) {
-                while (e.next()) {
-                    if (reverse ? e.getReverse(accessEnc) : e.get(accessEnc)) {
-                        action.accept(new MultiModalEdge(e.getEdge(), e.getBaseNode(), e.getAdjNode(), (long) (connectingWeighting.calcEdgeMillis(e.detach(false), reverse)), connectingWeighting.calcEdgeWeight(e.detach(false), reverse), e.getDistance(), e.getGrade()));
+                while (edgeIterator.next()) {
+                    if (edgeIterator.isFerry()) {
+                        continue;
+                    }
+                    if (reverse ? edgeIterator.getReverse(accessEnc) : edgeIterator.get(accessEnc)) {
+                        action.accept(new MultiModalEdge(edgeIterator.getEdge(), edgeIterator.getBaseNode(), edgeIterator.getAdjNode(), (long) (connectingWeighting.calcEdgeMillis(edgeIterator.detach(false), reverse)), connectingWeighting.calcEdgeWeight(edgeIterator.detach(false), reverse), edgeIterator.getDistance(), edgeIterator.getGrade()));
                         return true;
                     }
                 }

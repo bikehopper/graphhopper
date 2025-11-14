@@ -356,10 +356,13 @@ public class OSMReader {
         IntsRef edgeFlags = tagParserManager.handleWayTags(way, relationFlags);
         if (edgeFlags.isEmpty())
             return;
+          
+        // Store whether or not the edge is a ferry edge
+        boolean isFerry = way.getTag("route", "").equals("ferry");
 
         String name = way.getTag("way_name", "");
         EdgeIteratorState edge = baseGraph.edge(fromIndex, toIndex).setDistance(distance).setGrade(grade)
-                .setFlags(edgeFlags).setName(name);
+                .setIsFerry(isFerry).setFlags(edgeFlags).setName(name);
 
         // If the entire way is just the first and last point, do not waste space storing an empty way geometry
         if (pointList.size() > 2) {

@@ -306,4 +306,14 @@ class VirtualEdgeIterator implements EdgeIterator {
     public EdgeIteratorState setGrade(int grade) {
         return getCurrentEdge().setGrade(grade);
     }
+
+    @Override
+    public boolean isFerry() {
+        return getCurrentEdge().isFerry();
+    }
+
+    @Override
+    public EdgeIteratorState setIsFerry(boolean isFerry) {
+        return getCurrentEdge().setIsFerry(isFerry);
+    }
 }

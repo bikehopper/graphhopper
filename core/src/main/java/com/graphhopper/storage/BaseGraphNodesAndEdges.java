@@ -48,7 +48,7 @@ class BaseGraphNodesAndEdges {
 
     // edges
     private final DataAccess edges;
-    private final int E_NODEA, E_NODEB, E_LINKA, E_LINKB, E_FLAGS, E_DIST, E_GRADE, E_GEO, E_NAME;
+    private final int E_NODEA, E_NODEB, E_LINKA, E_LINKB, E_FLAGS, E_DIST, E_GRADE, E_IS_FERRY, E_GEO, E_NAME;
     private final int intsForFlags;
     private int edgeEntryBytes;
     private int edgeCount;
@@ -86,7 +86,8 @@ class BaseGraphNodesAndEdges {
         E_FLAGS = 16;
         E_DIST = E_FLAGS + intsForFlags * 4;
         E_GRADE = E_DIST + 4;
-        E_GEO = E_GRADE + 4;
+        E_IS_FERRY = E_GRADE + 4;
+        E_GEO = E_IS_FERRY + 4;
         E_NAME = E_GEO + 4;
         edgeEntryBytes = E_NAME + 4;
     }
@@ -277,6 +278,10 @@ class BaseGraphNodesAndEdges {
         edges.setInt(edgePointer + E_GRADE, grade);
     }
 
+    public void setIsFerry(long edgePointer, boolean isFerry) {
+        edges.setInt(edgePointer + E_GRADE, isFerry ? 1 : 0);
+    }
+
     public void setGeoRef(long edgePointer, int geoRef) {
         edges.setInt(edgePointer + E_GEO, geoRef);
     }
@@ -310,6 +315,11 @@ class BaseGraphNodesAndEdges {
     public int getGrade(long pointer) {
         int val = edges.getInt(pointer + E_GRADE);
         return val;
+    }
+
+    public boolean isFerry(long pointer) {
+        int val = edges.getInt(pointer + E_GRADE);
+        return val == 1;
     }
 
     public int getGeoRef(long edgePointer) {
