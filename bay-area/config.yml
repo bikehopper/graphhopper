@@ -1,8 +1,8 @@
 graphhopper:
 
   # OpenStreetMap input file PBF or XML, can be changed via command line -Ddw.graphhopper.datareader.file=some.pbf
-  datareader.file: /graphhopper/current-norcal-latest.osm.pbf
-  gtfs.file: /graphhopper/current-GTFSTransitData_RG.zip
+  datareader.file: data/osm.pbf
+  gtfs.file: data/gtfs.zip
 
   # Local folder used by graphhopper to store its data
   graph.location: graph-cache
@@ -103,7 +103,7 @@ graphhopper:
 
 
   # default location for cache is /tmp/srtm
-  graph.elevation.cache_dir: /data/elevation/
+  graph.elevation.cache_dir: data/elevation/
 
 
   # If you have a slow disk or plenty of RAM change the default MMAP to:
