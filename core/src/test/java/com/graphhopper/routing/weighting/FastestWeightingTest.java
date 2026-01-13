@@ -23,6 +23,7 @@ import com.graphhopper.routing.querygraph.VirtualEdgeIteratorState;
 import com.graphhopper.routing.util.Bike2WeightFlagEncoder;
 import com.graphhopper.routing.util.CarFlagEncoder;
 import com.graphhopper.routing.util.EncodingManager;
+import com.graphhopper.routing.util.TurnCostsConfig;
 import com.graphhopper.storage.BaseGraph;
 import com.graphhopper.storage.Graph;
 import com.graphhopper.storage.IntsRef;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.graphhopper.util.GHUtility.createMockedEdgeIteratorState;
 import static com.graphhopper.util.GHUtility.getEdge;
+import static com.graphhopper.util.Helper.createPointList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -53,7 +55,7 @@ public class FastestWeightingTest {
         Weighting instance = new FastestWeighting(encoder, new PMap().putObject(Parameters.Routing.HEADING_PENALTY, 100));
 
         VirtualEdgeIteratorState virtEdge = new VirtualEdgeIteratorState(0, GHUtility.createEdgeKey(1, false), 1, 2, 10,
-                GHUtility.setSpeed(10, 0, encoder, encodingManager.createEdgeFlags()), "test", Helper.createPointList(51, 0, 51, 1), false);
+                GHUtility.setSpeed(10, 0, encoder, encodingManager.createEdgeFlags()), "test", createPointList(51, 0, 51, 1), false);
         double time = instance.calcEdgeWeight(virtEdge, false);
 
         virtEdge.setUnfavored(true);
@@ -104,8 +106,10 @@ public class FastestWeightingTest {
     @Test
     public void calcWeightAndTime_withTurnCosts() {
         BaseGraph graph = new BaseGraph.Builder(encodingManager).create();
-        Weighting weighting = new FastestWeighting(encoder, new DefaultTurnCostProvider(encoder, graph.getTurnCostStorage()));
-        GHUtility.setSpeed(60, true, true, encoder, graph.edge(0, 1).setDistance(100));
+        Weighting weighting = new FastestWeighting(encoder,
+                new DefaultTurnCostProvider(encoder, graph.getTurnCostStorage()));
+        GHUtility.setSpeed(60, true, true, encoder,
+                graph.edge(0, 1).setDistance(100));
         EdgeIteratorState edge = GHUtility.setSpeed(60, true, true, encoder, graph.edge(1, 2).setDistance(100));
         // turn costs are given in seconds
         setTurnCost(graph, 0, 1, 2, 5);
@@ -136,8 +140,29 @@ public class FastestWeightingTest {
         assertEquals(6000 + 5000, GHUtility.calcMillisWithTurnMillis(weighting, edge, false, 0), 1.e-6);
     }
 
+    @Test
+    public void calcTurnsBikeEncoder() {
+        Bike2WeightFlagEncoder encoder = new Bike2WeightFlagEncoder();
+        EncodingManager em = EncodingManager.create(encoder);
+        BaseGraph graph = new BaseGraph.Builder(em).create();
+        Weighting weighting = new FastestWeighting(encoder,
+                new DefaultTurnCostProvider(graph,
+                        new TurnCostsConfig()));
+
+
+        EdgeIteratorState edge1 = GHUtility.setSpeed(20, true, true, encoder, graph.edge(0, 1).setDistance(100));
+        EdgeIteratorState edge2 = GHUtility.setSpeed(20, true, true, encoder, graph.edge(1, 2).setDistance(100));
+        edge1.setWayGeometry(createPointList(
+                37.76076, -122.43721, 0,
+                37.76083, -122.43606, 0));
+        edge2.setWayGeometry(createPointList(
+                37.76083, -122.43606, 0,
+                37.7609, -122.43503, 0));
+        assertEquals(18000, GHUtility.calcWeightWithTurnWeight(weighting, edge1, false, 1));
+        assertEquals(18000, GHUtility.calcMillisWithTurnMillis(weighting, edge1, false, 1), 1.e-6);
+    }
+
     private void setTurnCost(Graph graph, int from, int via, int to, double turnCost) {
         graph.getTurnCostStorage().set(((EncodedValueLookup) encodingManager).getDecimalEncodedValue(TurnCost.key(encoder.toString())), getEdge(graph, from, via).getEdge(), via, getEdge(graph, via, to).getEdge(), turnCost);
     }
-
 }
