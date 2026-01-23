@@ -19,7 +19,7 @@ public class OSMCyclewayParser implements TagParser {
 
     private final EnumEncodedValue<Cycleway> cyclewayEnc;
     private final Set<String> oneways = new HashSet<>(5);
-    protected final HashMap<String, Cycleway> oppositeLanes = new HashMap<>();
+    protected final HashMap<Cycleway, Cycleway> oppositeLanes = new HashMap<>();
 
     public OSMCyclewayParser() {
         this(new EnumEncodedValue<>(Cycleway.KEY, Cycleway.class, true));
@@ -32,10 +32,10 @@ public class OSMCyclewayParser implements TagParser {
         oneways.add("1");
         oneways.add("-1");
 
-        oppositeLanes.put("opposite", Cycleway.SHARED_LANE);
-        oppositeLanes.put("opposite_lane", Cycleway.LANE);
-        oppositeLanes.put("opposite_track", Cycleway.TRACK);
-        oppositeLanes.put("opposite_share_busway", Cycleway.SHARE_BUSWAY);
+        oppositeLanes.put(Cycleway.OPPOSITE, Cycleway.SHARED_LANE);
+        oppositeLanes.put(Cycleway.OPPOSITE_LANE, Cycleway.LANE);
+        oppositeLanes.put(Cycleway.OPPOSITE_TRACK, Cycleway.TRACK);
+        oppositeLanes.put(Cycleway.OPPOSITE_SHARE_BUSWAY, Cycleway.SHARE_BUSWAY);
     }
 
     @Override
@@ -96,6 +96,11 @@ public class OSMCyclewayParser implements TagParser {
                 cyclewayLeftOnewayTag.equals("") && drivingSide == DrivingSide.RIGHT
                 && !isOnewayForCars
             );
+            // Handle opposite* values for left
+            if (oppositeLanes.containsKey(cyclewayLeft)) {
+              cyclewayLeftBackward = true;
+              cyclewayLeft = oppositeLanes.get(cyclewayLeft);
+            }
             if (cyclewayLeftTwoway || cyclewayLeftBackward)
                 cyclewayBackward = mergeCyclewayValues(cyclewayBackward, cyclewayLeft);
             if (cyclewayLeftTwoway || !cyclewayLeftBackward)
@@ -109,6 +114,11 @@ public class OSMCyclewayParser implements TagParser {
                 cyclewayRightOnewayTag.equals("") && drivingSide == DrivingSide.LEFT
                 && !isOnewayForCars
             );
+            // Handle opposite* values for right
+            if (oppositeLanes.containsKey(cyclewayRight)) {
+              cyclewayRightBackward = true;
+              cyclewayRight = oppositeLanes.get(cyclewayRight);
+            }
             if (cyclewayRightTwoway || cyclewayRightBackward)
                 cyclewayBackward = mergeCyclewayValues(cyclewayBackward, cyclewayRight);
             if (cyclewayRightTwoway || !cyclewayRightBackward)
