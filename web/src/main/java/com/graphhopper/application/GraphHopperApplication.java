@@ -51,7 +51,6 @@ public final class GraphHopperApplication extends Application<GraphHopperServerC
 
     @Override
     public void run(GraphHopperServerConfiguration configuration, Environment environment) {
-        environment.jersey().register(new RootResource());
         environment.jersey().register(NavigateResource.class);
         environment.servlets().addFilter("cors", CORSFilter.class).addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), false, "*");
     }
