@@ -45,12 +45,14 @@ public final class GraphHopperApplication extends Application<GraphHopperServerC
         bootstrap.addCommand(new ImportCommand());
         bootstrap.addCommand(new MatchCommand());
         bootstrap.addBundle(new AssetsBundle("/com/graphhopper/maps/", "/maps/", "index.html"));
+        bootstrap.addBundle(new AssetsBundle("/debug/", "/debug-tiles/", "ways.pmtiles", "debug-tiles"));
         // see this link even though its outdated?! // https://www.webjars.org/documentation#dropwizard
         bootstrap.addBundle(new AssetsBundle("/META-INF/resources/webjars", "/webjars/", null, "webjars"));
     }
 
     @Override
     public void run(GraphHopperServerConfiguration configuration, Environment environment) {
+        environment.jersey().register(new RootResource());
         environment.jersey().register(NavigateResource.class);
         environment.servlets().addFilter("cors", CORSFilter.class).addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), false, "*");
     }
