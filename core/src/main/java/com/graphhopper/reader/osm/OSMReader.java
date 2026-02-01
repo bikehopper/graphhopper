@@ -112,7 +112,9 @@ public class OSMReader {
         try {
             if (config.shouldDumpWays()){
                 Path filePath = Paths.get(config.getWaysDumpPath());
-                Files.deleteIfExists(filePath);
+                Path directoryPath = filePath.getParent();
+                Files.deleteIfExists(directoryPath);
+                Files.createDirectories(directoryPath);
                 ldGeojsonWriter = Files.newBufferedWriter(filePath, StandardOpenOption.CREATE);
             }
         } catch (Exception e) {
