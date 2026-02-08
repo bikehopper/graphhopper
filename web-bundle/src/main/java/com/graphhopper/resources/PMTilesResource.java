@@ -77,11 +77,8 @@ public class PMTilesResource {
         res.header("Content-Length", length);
         res.header("Content-Type", mimeType);
 
-        if (partial) {
-            res.header("Content-Range", "bytes " + start + "-" + end + "/" + file.length());
-        } else {
-           res.header("Accept-Ranges", "bytes"); // Indicate that the server accepts range requests
-        }
+        res.header("Content-Range", "bytes " + start + "-" + end + "/" + file.length());
+        res.header("Accept-Ranges", "bytes"); // Indicate that the server accepts range requests
 
         return res.build();
     }
