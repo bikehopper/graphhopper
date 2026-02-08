@@ -41,7 +41,7 @@ public class PMTilesResource {
         }
         // Assume full file
         long start = 0;
-        long end = file.length();
+        long end = file.length() - 1;
         boolean partial = range != null;
 
         ResponseBuilder res;
@@ -53,7 +53,7 @@ public class PMTilesResource {
             // if end is specified set to it
             if (ranges.length > 1) {
                 long potentialEnd = Long.parseLong(ranges[1]);
-                if (potentialEnd < end) {
+                if (potentialEnd <= end) {
                     end = potentialEnd;
                 }
             }
@@ -66,7 +66,7 @@ public class PMTilesResource {
 
         file.seek(start);
 
-        int length = (int) (end - start);
+        int length = (int) (end - start) + 1;
         byte[] data = new byte[length];
 
         // Read the data into the buffer
