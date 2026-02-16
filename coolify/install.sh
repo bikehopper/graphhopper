@@ -29,4 +29,5 @@ mvn clean install -DskipTests # install dependencies
 
 # build graph
 java -Xmx8g -jar web/target/graphhopper-web-*.jar import bay-area/config.yml
-npx @bikehopper/node-tippecanoe -zg -Z8 -l ways_dump -P -o web-bundle/src/main/resources/com/graphhopper/maps/ways.pmtiles --drop-densest-as-needed logs/ways_dump.ldgeojson
+npx @bikehopper/node-tippecanoe -z14 -Z8 --maximum-tile-bytes=1000000 -l ways_dump -P -o web-bundle/src/main/resources/debug/ways.pmtiles --drop-densest-as-needed /tmp/graphhopper/ways_dump.ldgeojson
+rm /tmp/graphhopper/ways_dump.ldgeojson
