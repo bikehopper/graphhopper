@@ -19,13 +19,11 @@ package com.graphhopper.routing.util;
 
 import com.graphhopper.reader.ReaderWay;
 import com.graphhopper.routing.ev.*;
-import com.graphhopper.routing.util.countryrules.CountryRule;
 import com.graphhopper.routing.weighting.PenaltyWeighting;
 import com.graphhopper.storage.IntsRef;
 import com.graphhopper.util.Helper;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import static com.graphhopper.routing.ev.RouteNetwork.*;
 import static com.graphhopper.routing.ev.Cycleway.*;
@@ -156,10 +154,14 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         setHighwaySpeed("steps", PUSHING_SECTION_SPEED / 2);
         avoidHighwayTags.add("steps");
 
+        addPushingSection("footway");
+        addPushingSection("platform");
+        for (String pushingSection : pushingSectionsHighways)
+            setHighwaySpeed(pushingSection, PUSHING_SECTION_SPEED);
+
         final int CYCLEWAY_SPEED = 18;  // Make sure cycleway and path use same speed value, see #634
         setHighwaySpeed("cycleway", CYCLEWAY_SPEED);
         setHighwaySpeed("path", CYCLEWAY_SPEED);
-        setHighwaySpeed("footway", 14);
         setHighwaySpeed("platform", 6);
         setHighwaySpeed("pedestrian", CYCLEWAY_SPEED);
         setHighwaySpeed("track", CYCLEWAY_SPEED);
@@ -218,7 +220,6 @@ abstract public class BikeCommonFlagEncoder extends AbstractFlagEncoder {
         highwayMap.put("tertiary", AVOID.getValue());
         highwayMap.put("tertiary_link", AVOID.getValue());
         // Pedestrian ways
-        highwayMap.put("footway", UNCHANGED.getValue());
         highwayMap.put("path", SLIGHT_PREFER.getValue());
         highwayMap.put("pedestrian", VERY_NICE.getValue());
         // Quiet ways
