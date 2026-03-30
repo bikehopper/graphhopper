@@ -648,4 +648,17 @@ public class BikeFlagEncoderTest extends AbstractBikeFlagEncoderTester {
         assertEquals(PenaltyCode.BEST.getValue(),
                 penaltyEnc.getDecimal(false, edgeFlags));
     }
+
+    // Checks that a corridor has a positive average speed.
+    @Test
+    public void testCorridor() {
+        ReaderWay corridor = new ReaderWay(1);
+        corridor.setTag("foot", "yes");
+        corridor.setTag("highway", "corridor");
+        corridor.setTag("indoor", "yes");
+        IntsRef edgeFlags = encodingManager.createEdgeFlags();
+
+        encoder.handleWayTags(edgeFlags, corridor);
+        assertEquals(PUSHING_SECTION_SPEED, avgSpeedEnc.getDecimal(false, edgeFlags));
+    }
 }
