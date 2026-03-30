@@ -288,6 +288,9 @@ public class TagParserManager implements EncodedValueLookup {
                 // TODO introduce road_access for different vehicles? But how to create it in DefaultTagParserFactory?
                 _addEdgeTagParser(new OSMRoadAccessParser(), false);
             }
+            if (!em.hasEncodedValue(Orientation.KEY)) {
+                _addEdgeTagParser(new OrientationCalculator(), false);
+            }
 
             if (dateRangeParser == null)
                 dateRangeParser = new DateRangeParser(DateRangeParser.createCalendar());
